@@ -19,7 +19,7 @@ Bei einem privaten Repository benötigt der verwendete GitHub-Account Zugriff. D
 
 1. Öffne Projektfach und klicke auf **Aufnahme starten**. Kopiere anschließend einen Text, ein Bild oder Dateien im Finder.
 2. Drücke **⇧⌘J**. Tippe ein Wort aus dem Text, dem Dateinamen oder dem Screenshot. Die Pfeiltasten wechseln den Fund.
-3. Wähle unter **Projekt wählen** einen Ordner. **⌘↩** legt den Fund dort in einem eigenen Unterordner ab. Weitere Projektordner lassen sich über dasselbe Menü hinzufügen. Die letzte Auswahl bleibt erhalten.
+3. Wähle unter **Projekt wählen** einen Ordner. Die Ansicht **Projektordner** zeigt die vorhandenen Dateien und Unterordner. Wechsle zurück zu **Zwischenablage**. **⌘↩** legt den ausgewählten Fund dort in einem eigenen Unterordner ab. Weitere Projektordner lassen sich über dasselbe Menü hinzufügen. Die letzte Auswahl bleibt erhalten.
 4. **↩** setzt den Fund in die vorherige App ein, wenn Projektfach die macOS-Freigabe unter „Datenschutz & Sicherheit → Bedienungshilfen“ hat. Ohne Freigabe wird der Fund kopiert. **Esc** schließt das Fenster.
 
 Text wird als Markdown-Datei abgelegt. Bei Dateien werden die Originale beim Export kopiert. Bis dahin enthält der Verlauf ihre Pfade. Verschobene Dateien lassen sich neu im Finder kopieren. Ein fehlgeschlagener Export verwirft die angefangene Ablage.
@@ -39,6 +39,7 @@ Das globale Tastenkürzel lässt sich im Zahnrad-Menü neu aufnehmen. Die Vorsch
 
 ```sh
 swift run FachChecks
+./scripts/check-capture.sh
 ./scripts/build-app.sh
 ```
 
