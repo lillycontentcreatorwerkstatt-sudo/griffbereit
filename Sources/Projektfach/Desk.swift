@@ -52,7 +52,8 @@ final class Desk: ObservableObject {
     var target: NSRunningApplication?
     var dismiss: () -> Void = {}
     var updateIcon: () -> Void = {}
-    var matches: [Record] {
+    var matches: [Record] { matching(query) }
+    func matching(_ query: String) -> [Record] {
         let terms = query.split(whereSeparator: { $0.isWhitespace })
         return rows.filter { row in terms.allSatisfy { term in
             row.title.localizedStandardContains(String(term)) || row.searchable.localizedStandardContains(String(term))
@@ -345,36 +346,54 @@ final class Desk: ObservableObject {
         return NSImage(data: bytes)
     }
 
+    func copyToPasteboard(_ record: Record) throws {
+        guard let archive else { throw FachError("Der Verlaufsspeicher ist nicht verfügbar.") }
+        let bytes = try archive.data(record.id)
+        let objects: [NSPasteboardWriting]
+        switch record.kind {
+        case .text: objects = [String(decoding: bytes, as: UTF8.self) as NSString]
+        case .image:
+            guard let image = NSImage(data: bytes) else { throw FachError("Das Bild kann nicht geöffnet werden.") }
+            objects = [image]
+        case .files:
+            let paths = try JSONDecoder().decode([String].self, from: bytes)
+            guard paths.allSatisfy(FileManager.default.fileExists(atPath:)) else { throw FachError("Mindestens eine Datei wurde verschoben oder gelöscht.") }
+            objects = paths.map { URL(fileURLWithPath: $0) as NSURL }
+        }
+        pb.clearContents()
+        guard pb.writeObjects(objects) else { throw FachError("Die Zwischenablage konnte nicht beschrieben werden.") }
+        change = pb.changeCount
+    }
+
     func use(paste: Bool) {
-        guard let record = current, let archive else { return }
+        guard let record = current else { return }
         do {
-            let bytes = try archive.data(record.id)
-            let objects: [NSPasteboardWriting]
-            switch record.kind {
-            case .text: objects = [String(decoding: bytes, as: UTF8.self) as NSString]
-            case .image:
-                guard let image = NSImage(data: bytes) else { throw FachError("Das Bild kann nicht geöffnet werden.") }
-                objects = [image]
-            case .files:
-                let paths = try JSONDecoder().decode([String].self, from: bytes)
-                guard paths.allSatisfy(FileManager.default.fileExists(atPath:)) else { throw FachError("Mindestens eine Datei wurde verschoben oder gelöscht.") }
-                objects = paths.map { URL(fileURLWithPath: $0) as NSURL }
-            }
-            pb.clearContents()
-            guard pb.writeObjects(objects) else { throw FachError("Die Zwischenablage konnte nicht beschrieben werden.") }
-            change = pb.changeCount
+            try copyToPasteboard(record)
             guard paste, let target, !target.isTerminated else { message = "Kopiert. Mit ⌘V einsetzen."; return }
             guard AXIsProcessTrusted() else { message = "Kopiert. Nutze ⌘V oder erlaube Direkt-Einfügen unter Bedienungshilfen."; return }
             dismiss()
-            target.activate(options: [])
-            DispatchQueue.main.asyncAfter(deadline: .now() + 0.16) {
-                guard target.isActive, let down = CGEvent(keyboardEventSource: nil, virtualKey: 9, keyDown: true),
-                      let up = CGEvent(keyboardEventSource: nil, virtualKey: 9, keyDown: false) else { return }
-                down.flags = .maskCommand
-                up.flags = .maskCommand
-                down.post(tap: .cghidEventTap)
-                up.post(tap: .cghidEventTap)
-            }
+            pasteInto(target)
         } catch { message = error.localizedDescription }
+    }
+
+    func pasteInto(_ target: NSRunningApplication) {
+        let copiedChange = pb.changeCount
+        if !target.isActive { target.activate(options: []) }
+        Task { @MainActor in
+            for _ in 0..<20 {
+                try? await Task.sleep(for: .milliseconds(30))
+                guard pb.changeCount == copiedChange, !target.isTerminated else { return }
+                if target.isActive {
+                    guard let down = CGEvent(keyboardEventSource: nil, virtualKey: 9, keyDown: true),
+                          let up = CGEvent(keyboardEventSource: nil, virtualKey: 9, keyDown: false) else { break }
+                    down.flags = .maskCommand
+                    up.flags = .maskCommand
+                    down.postToPid(target.processIdentifier)
+                    up.postToPid(target.processIdentifier)
+                    return
+                }
+            }
+            message = "Kopiert. Aktiviere das Zielfenster und füge mit ⌘V ein."
+        }
     }
 }

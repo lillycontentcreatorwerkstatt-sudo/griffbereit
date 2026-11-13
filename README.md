@@ -27,11 +27,13 @@ Während Projektfach läuft, sammelt es neue kopierte Texte und Finder-Dateiverw
 
 Bei einem neuen Bild erscheint eine Vorschau. **Nur Text** übernimmt den erkannten Text in den Verlauf. **Bild behalten** speichert das Bild als PNG. **Überspringen** verwirft die Anfrage. Das von macOS angelegte Screenshot-Original bleibt in seinem Ordner. Bei einem Bild ohne lesbaren Text kannst du weiterhin das Bild wählen.
 
-Mit **⇧⌘J** öffnest du den Verlauf. Suche nach einem Wort und wähle mit den Pfeiltasten einen Eintrag. **↩** setzt ihn in die vorherige App ein, wenn Projektfach die Berechtigung für Bedienungshilfen hat. Ohne Freigabe wird er kopiert. **⌘↩** exportiert den gewählten Eintrag in den Projektordner. Bei Finder-Dateien werden die Originale erst beim Export kopiert.
+Setze den Cursor in ein Textfeld und drücke **⇧⌘J**. Auf dem Bildschirm am Mauszeiger erscheint eine kompakte Schnellauswahl, der Hintergrund wird leicht abgedunkelt. Ein Klick auf einen Eintrag setzt ihn am Cursor ein. Du kannst auch suchen und mit Pfeiltasten und **↩** auswählen. **Esc**, ein Klick außerhalb oder das Kürzel schließen die Auswahl. Direktes Einfügen benötigt die macOS-Freigabe unter **Datenschutz & Sicherheit → Bedienungshilfen → Projektfach**. Ohne Freigabe kopiert der Klick den Eintrag, den du mit **Esc** und **⌘V** einsetzt.
+
+Ein Klick auf das Projektfach-Symbol in der Menüleiste öffnet das Hauptfenster. **⌘↩** exportiert den gewählten Eintrag in den Projektordner. Bei Finder-Dateien werden die Originale erst beim Export kopiert.
 
 ## Einträge löschen
 
-Öffne mit **⇧⌘J** die **Zwischenablage**. Wähle einen Eintrag aus und klicke in seiner Vorschau auf **Eintrag löschen**. Für den gesamten aktiven Verlauf klicke über der Liste auf **Verlauf leeren …** und bestätige mit **Verlauf löschen**. Die Suche schränkt die vollständige Löschung nicht ein. Bereits exportierte Dateien und der aktuelle Inhalt der macOS-Zwischenablage bleiben erhalten.
+Klicke auf das Projektfach-Symbol in der Menüleiste und öffne die **Zwischenablage**. Wähle einen Eintrag aus und klicke in seiner Vorschau auf **Eintrag löschen**. Für den gesamten aktiven Verlauf klicke über der Liste auf **Verlauf leeren …** und bestätige mit **Verlauf löschen**. Die Suche schränkt die vollständige Löschung nicht ein. Bereits exportierte Dateien und der aktuelle Inhalt der macOS-Zwischenablage bleiben erhalten.
 
 ## Verlauf und Privatsphäre
 

@@ -201,7 +201,7 @@ struct Surface: View {
         .sheet(isPresented: $desk.dictating) { DictationSheet(desk: desk) }
         .sheet(isPresented: $settings) {
             Form {
-                Section("Bedienung") { LabeledContent("Verlauf öffnen") { KeyEditor(keys: keys).frame(width: 142) }
+                Section("Bedienung") { LabeledContent("Schnell einfügen") { KeyEditor(keys: keys).frame(width: 142) }
                     LabeledContent("Sprachnotiz starten / beenden") { KeyEditor(keys: voiceKeys).frame(width: 142) }
                     if !keys.problem.isEmpty { Text(keys.problem) }
                     if !voiceKeys.problem.isEmpty { Text(voiceKeys.problem) }

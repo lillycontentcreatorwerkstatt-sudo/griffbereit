@@ -33,6 +33,21 @@ struct CaptureFlowCheck {
         try await wait("Erste Kopie erscheint nicht") { desk.current?.title == "Erster Fund" }
         copy("Zweiter Fund")
         try await wait("Neue Kopie fehlt in der Vorschau") { desk.rows.count == 2 && desk.current?.title == "Zweiter Fund" }
+        guard let first = desk.matching("Erster Fund").first else { throw FachError("Schnellsuche findet den Text nicht") }
+        try desk.copyToPasteboard(first)
+        guard board.string(forType: .string) == "Erster Fund", desk.current?.title == "Zweiter Fund" else {
+            throw FachError("Schnellauswahl kopiert die falsche Zeile")
+        }
+        _ = NSApplication.shared
+        let picker = QuickPaste()
+        picker.show(desk: desk, target: NSRunningApplication.current)
+        guard picker.isVisible, let panel = NSApp.windows.first(where: { $0.title == "Schnell einfügen" && $0.isVisible }),
+              panel.styleMask.contains(.nonactivatingPanel), panel.frame.height <= (panel.screen?.visibleFrame.height ?? 0) * 0.6 else {
+            throw FachError("Kompaktes Einfügefenster fehlt")
+        }
+        picker.close()
+        guard !picker.isVisible, !panel.isVisible else { throw FachError("Auswahlfenster noch sichtbar") }
+        print("✓ Schnellauswahl öffnen, schließen und eine andere Zeile als die Hauptauswahl kopieren")
         desk.chooseProject(folder)
         try await wait("Ordner konnte nicht gelesen werden") { !desk.browser.loading }
         guard desk.showingProject, desk.browser.entries.isEmpty, desk.browser.error.isEmpty else {

@@ -4,6 +4,7 @@ import SwiftUI
 @MainActor
 final class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
     private var item: NSStatusItem!
+    private let quickPaste = QuickPaste()
     private var window: NSWindow!
     private var desk: Desk!
     private var keys: HotKey!
@@ -11,7 +12,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
 
     func applicationDidFinishLaunching(_ notification: Notification) {
         desk = Desk()
-        keys = HotKey { [weak self] in self?.toggleWindow() }
+        keys = HotKey { [weak self] in self?.toggleQuickPaste() }
         voiceKeys = HotKey(identifier: 2, initial: .voice) { [weak self] in
             guard let self else { return }
             if desk.dictating { desk.stopDictation(); return }
@@ -62,7 +63,15 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
         if window.attachedSheet != nil { show(); return }
         if window.isKeyWindow { window.orderOut(nil) } else { show() }
     }
+    private func toggleQuickPaste() {
+        if quickPaste.isVisible { quickPaste.close(); return }
+        guard let front = NSWorkspace.shared.frontmostApplication,
+              front != .current, window.attachedSheet == nil else { toggleWindow(); return }
+        quickPaste.show(desk: desk, target: front)
+    }
+
     private func show() {
+        quickPaste.close()
         let front = NSWorkspace.shared.frontmostApplication
         if front != NSRunningApplication.current { desk.target = front }
         NSApp.activate(ignoringOtherApps: true)

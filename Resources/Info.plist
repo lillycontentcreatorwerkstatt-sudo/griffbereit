@@ -6,8 +6,8 @@
 <key>CFBundleName</key><string>Projektfach</string>
 <key>CFBundleDisplayName</key><string>Projektfach</string>
 <key>CFBundlePackageType</key><string>APPL</string>
-<key>CFBundleVersion</key><string>5</string>
-<key>CFBundleShortVersionString</key><string>0.3.1</string>
+<key>CFBundleVersion</key><string>6</string>
+<key>CFBundleShortVersionString</key><string>0.4.0</string>
 <key>LSMinimumSystemVersion</key><string>14.0</string>
 <key>LSUIElement</key><true/>
 <key>NSDownloadsFolderUsageDescription</key><string>Projektfach erkennt neue Bildschirmfotos im konfigurierten Screenshot-Ordner und fragt, wie sie abgelegt werden sollen.</string>
