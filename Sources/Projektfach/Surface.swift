@@ -29,6 +29,7 @@ struct Surface: View {
     @ObservedObject var voiceKeys: HotKey
     @State private var settings = false
     @State private var confirmClear = false
+    @State private var confirmSettingsClear = false
     @FocusState private var searchFocus: Bool
 
     var body: some View {
@@ -102,7 +103,17 @@ struct Surface: View {
                 Divider()
                 HStack(spacing: 0) {
                     VStack(alignment: .leading, spacing: 0) {
-                        Text("Verlauf").font(.headline).padding(.horizontal, 14).padding(.vertical, 10)
+                        HStack {
+                            Text("Verlauf").font(.headline)
+                            Spacer()
+                            Button("Verlauf leeren …") { confirmClear = true }
+                                .disabled(desk.rows.isEmpty)
+                        }.padding(.horizontal, 14).padding(.vertical, 10)
+                        .confirmationDialog("Aktuellen Verlauf vollständig löschen?", isPresented: $confirmClear) {
+                            Button("Verlauf löschen", role: .destructive) { desk.erase(all: true) }
+                        } message: {
+                            Text("Alle Einträge im aktuellen Projektfach-Verlauf werden gelöscht, auch ausgeblendete Suchtreffer.")
+                        }
                         if desk.matches.isEmpty {
                             Text(desk.query.isEmpty ? (desk.live ? "Kopiere in einer anderen App Text, ein Bild oder eine Datei mit ⌘C." : "Diktiere eine Notiz oder aktiviere „Kopiertes sammeln“.") : "Keine passenden Einträge.")
                                 .foregroundStyle(.secondary).padding(.horizontal, 14)
@@ -128,7 +139,13 @@ struct Surface: View {
                     if let row = desk.current {
                         ScrollView {
                             VStack(alignment: .leading, spacing: 12) {
-                                Label(row.kind.label, systemImage: row.kind.symbol).font(.headline).foregroundStyle(.secondary)
+                                HStack {
+                                    Label(row.kind.label, systemImage: row.kind.symbol).font(.headline).foregroundStyle(.secondary)
+                                    Spacer()
+                                    Button(role: .destructive) { desk.erase(all: false) } label: {
+                                        Label("Eintrag löschen", systemImage: "trash")
+                                    }
+                                }
                                 if row.kind == .image, let image = desk.preview(row) {
                                     Image(nsImage: image).resizable().scaledToFit().frame(maxHeight: 180).accessibilityLabel("Bildvorschau")
                                 }
@@ -198,7 +215,7 @@ struct Surface: View {
                     }
                     TextField("Ausgeschlossene App-IDs", text: $desk.exclusions, prompt: Text("z. B. com.apple.mail"))
                     Text("Mehrere Bundle-IDs mit Komma trennen.").font(.caption)
-                    Button("Aktuellen Verlauf leeren …", role: .destructive) { confirmClear = true }
+                    Button("Aktuellen Verlauf leeren …", role: .destructive) { confirmSettingsClear = true }
                 }
                 HStack {
                     Button("App beenden") { NSApp.terminate(nil) }
@@ -206,7 +223,7 @@ struct Surface: View {
                     Button("Fertig") { settings = false }.keyboardShortcut(.defaultAction)
                 }
             }.formStyle(.grouped).frame(width: 480, height: 480)
-            .confirmationDialog("Aktuellen Verlauf vollständig löschen?", isPresented: $confirmClear) {
+            .confirmationDialog("Aktuellen Verlauf vollständig löschen?", isPresented: $confirmSettingsClear) {
                 Button("Verlauf löschen", role: .destructive) { desk.erase(all: true) }
             }
         }

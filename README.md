@@ -29,6 +29,10 @@ Bei einem neuen Bild erscheint eine Vorschau. **Nur Text** übernimmt den erkann
 
 Mit **⇧⌘J** öffnest du den Verlauf. Suche nach einem Wort und wähle mit den Pfeiltasten einen Eintrag. **↩** setzt ihn in die vorherige App ein, wenn Projektfach die Berechtigung für Bedienungshilfen hat. Ohne Freigabe wird er kopiert. **⌘↩** exportiert den gewählten Eintrag in den Projektordner. Bei Finder-Dateien werden die Originale erst beim Export kopiert.
 
+## Einträge löschen
+
+Öffne mit **⇧⌘J** die **Zwischenablage**. Wähle einen Eintrag aus und klicke in seiner Vorschau auf **Eintrag löschen**. Für den gesamten aktiven Verlauf klicke über der Liste auf **Verlauf leeren …** und bestätige mit **Verlauf löschen**. Die Suche schränkt die vollständige Löschung nicht ein. Bereits exportierte Dateien und der aktuelle Inhalt der macOS-Zwischenablage bleiben erhalten.
+
 ## Verlauf und Privatsphäre
 
 Beim ersten Start dieser Version ist **Kopiertes sammeln** an. Die App merkt sich die gewählte Einstellung. Spracherkennung, Texterkennung und KI-Überarbeitung laufen lokal. Es wird keine Audiodatei gespeichert. Die lokale SQLite-Datenbank liegt unter `~/Library/Application Support/Projektfach/funde.sqlite`. Sie enthält auch Bilddaten und ist nicht separat verschlüsselt. Speicherorte für Projekte bestimmst du selbst, einschließlich möglicher Cloud-Ordner.

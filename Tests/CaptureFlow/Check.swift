@@ -81,6 +81,16 @@ struct CaptureFlowCheck {
         try await wait("Bild aus Zwischenablage fehlt") { desk.images.count == 1 }
         await desk.keepImage(textOnly: false)
         try await wait("Bild nicht gespeichert") { desk.current?.kind == .image }
+        let kept = desk.rows.filter { $0.kind != .image }.map(\.id)
+        desk.erase(all: false)
+        guard desk.rows.map(\.id) == kept else { throw FachError("Einzellöschung hat falsche Einträge entfernt") }
+        desk.query = "Erster Fund"
+        desk.erase(all: true)
+        guard desk.rows.isEmpty, desk.current == nil, board.data(forType: .png) == png,
+              FileManager.default.fileExists(atPath: saved.appendingPathComponent("Notiz.md").path) else {
+            throw FachError("Verlauf leeren bei aktiver Suche fehlerhaft")
+        }
+        print("✓ Einzelnen Eintrag und gesamten gefilterten Verlauf löschen")
         print("✓ Screenshot-Datei, OCR ohne Bildspeicherung und Bildwahl aus der Zwischenablage")
         print("✓ Aufnehmen, neue Auswahl, Ordnerwahl, Export, Ordneransicht und Pause")
     }
