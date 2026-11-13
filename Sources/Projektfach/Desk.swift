@@ -216,6 +216,20 @@ final class Desk: ObservableObject {
         }
     }
 
+    func saveNote(_ draft: String) throws {
+        let text = draft.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !text.isEmpty else { throw FachError("Die Notiz ist leer.") }
+        guard let archive else { throw FachError("Der Verlaufsspeicher ist nicht verfügbar.") }
+        let title = text.split(whereSeparator: { $0.isNewline }).first.map { String($0.prefix(90)) } ?? "Notiz"
+        let id = try archive.save(.text, payload: Data(text.utf8), title: title, words: text)
+        query = ""
+        try refresh()
+        selection = id
+        showingProject = false
+        lastExport = nil
+        message = "Notiz übernommen."
+    }
+
     func addProject(browse: Bool = true) {
         let choose = NSOpenPanel()
         choose.canChooseFiles = false

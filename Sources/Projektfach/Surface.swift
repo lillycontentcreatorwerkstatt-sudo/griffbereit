@@ -26,6 +26,7 @@ struct KeyEditor: NSViewRepresentable {
 struct Surface: View {
     @ObservedObject var desk: Desk
     @ObservedObject var keys: HotKey
+    @State private var dictating = false
     @State private var settings = false
     @State private var confirmClear = false
     @FocusState private var searchFocus: Bool
@@ -36,9 +37,9 @@ struct Surface: View {
                 Image(systemName: "tray.2.fill").font(.title2).foregroundStyle(Color.accentColor)
                 Text("Projektfach").font(.title2.weight(.semibold))
                 Spacer()
-                Button { desk.toggle() } label: {
-                    Label(desk.live ? "Aufnahme pausieren" : "Aufnahme starten", systemImage: desk.live ? "pause.circle" : "record.circle")
-                }
+                Button { dictating = true } label: {
+                    Label("Diktieren", systemImage: "mic.fill")
+                }.buttonStyle(.borderedProminent)
                 Button { settings = true } label: { Image(systemName: "gearshape") }
                     .accessibilityLabel("Einstellungen").help("Einstellungen")
             }.padding(16)
@@ -49,8 +50,9 @@ struct Surface: View {
                     Text("Projektordner").tag(true)
                 }.labelsHidden().pickerStyle(.segmented).fixedSize()
                 Spacer()
-                Label(desk.live ? "Aufnahme aktiv" : "Aufnahme aus", systemImage: desk.live ? "waveform" : "pause")
-                    .font(.callout).foregroundStyle(.secondary)
+                Toggle("Kopiertes sammeln", isOn: Binding(get: { desk.live }, set: { enabled in
+                    if desk.live != enabled { desk.toggle() }
+                })).toggleStyle(.switch).controlSize(.small)
             }.padding(.horizontal, 14).padding(.vertical, 8)
             if desk.live && !desk.captureNotice.isEmpty {
                 Text(desk.captureNotice).font(.callout).frame(maxWidth: .infinity, alignment: .leading).padding(.horizontal, 14)
@@ -76,7 +78,7 @@ struct Surface: View {
                     VStack(alignment: .leading, spacing: 0) {
                         Text("Verlauf").font(.headline).padding(.horizontal, 14).padding(.vertical, 10)
                         if desk.matches.isEmpty {
-                            Text(desk.query.isEmpty ? (desk.live ? "Kopiere in einer anderen App Text, ein Bild oder eine Datei mit ⌘C." : "Starte die Aufnahme für deinen ersten Fund.") : "Keine passenden Einträge.")
+                            Text(desk.query.isEmpty ? (desk.live ? "Kopiere in einer anderen App Text, ein Bild oder eine Datei mit ⌘C." : "Diktiere eine Notiz oder aktiviere „Kopiertes sammeln“.") : "Keine passenden Einträge.")
                                 .foregroundStyle(.secondary).padding(.horizontal, 14)
                             Spacer()
                         } else {
@@ -154,6 +156,7 @@ struct Surface: View {
         .onAppear { searchFocus = true }
         .onReceive(NotificationCenter.default.publisher(for: NSWindow.didBecomeKeyNotification)) { _ in if !settings { searchFocus = true } }
         .onExitCommand { desk.dismiss() }
+        .sheet(isPresented: $dictating) { DictationSheet(desk: desk) }
         .sheet(isPresented: $settings) {
             Form {
                 Section("Bedienung") { LabeledContent("Verlauf öffnen") { KeyEditor(keys: keys).frame(width: 142) }

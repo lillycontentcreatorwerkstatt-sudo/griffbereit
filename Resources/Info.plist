@@ -6,9 +6,11 @@
 <key>CFBundleName</key><string>Projektfach</string>
 <key>CFBundleDisplayName</key><string>Projektfach</string>
 <key>CFBundlePackageType</key><string>APPL</string>
-<key>CFBundleVersion</key><string>2</string>
-<key>CFBundleShortVersionString</key><string>0.1.1</string>
+<key>CFBundleVersion</key><string>3</string>
+<key>CFBundleShortVersionString</key><string>0.2.0</string>
 <key>LSMinimumSystemVersion</key><string>14.0</string>
 <key>LSUIElement</key><true/>
+<key>NSMicrophoneUsageDescription</key><string>Projektfach verwendet beim Diktieren das Mikrofon, um deine Notiz als Text zu erfassen.</string>
+<key>NSSpeechRecognitionUsageDescription</key><string>Projektfach wandelt dein deutsches Diktat auf diesem Mac in eine Notiz um.</string>
 <key>NSPrincipalClass</key><string>NSApplication</string>
 </dict></plist>

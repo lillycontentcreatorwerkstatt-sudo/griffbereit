@@ -51,6 +51,16 @@ struct CaptureFlowCheck {
         copy("Während der Pause")
         RunLoop.main.run(until: Date().addingTimeInterval(0.8))
         guard desk.rows.count == 2 else { throw FachError("Aufnahme läuft trotz Pause") }
+        desk.query = "Alter Suchfilter"
+        try desk.saveNote("  Eine diktierte Idee.  ")
+        guard !desk.live, desk.query.isEmpty, desk.current?.searchable == "Eine diktierte Idee.",
+              desk.rows.count == 3, !desk.showingProject else { throw FachError("Diktat im Verlauf fehlt") }
+        desk.export()
+        try wait("Diktat wurde nicht exportiert") { desk.lastExport != nil }
+        guard let note = desk.lastExport, try String(contentsOf: note.appendingPathComponent("Notiz.md"), encoding: .utf8) == "Eine diktierte Idee." else {
+            throw FachError("Diktat im Projektordner fehlerhaft")
+        }
+        print("✓ Diktattext übernehmen und bei pausierter Zwischenablage als Markdown ablegen")
         print("✓ Aufnehmen, neue Auswahl, Ordnerwahl, Export, Ordneransicht und Pause")
     }
 }

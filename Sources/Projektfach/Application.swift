@@ -39,7 +39,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
     }
 
     private func updateIcon() {
-        let label = desk.live ? "Projektfach, Aufnahme läuft" : "Projektfach, Aufnahme pausiert"
+        let label = desk.live ? "Projektfach, sammelt Kopiertes" : "Projektfach, Sammeln pausiert"
         let icon = NSImage(systemSymbolName: desk.live ? "tray.2.fill" : "tray.2", accessibilityDescription: label)
         icon?.isTemplate = true
         item.button?.image = icon
@@ -47,6 +47,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
     }
     func applicationShouldHandleReopen(_ sender: NSApplication, hasVisibleWindows flag: Bool) -> Bool { show(); return true }
     @objc private func toggleWindow() {
+        if window.attachedSheet != nil { show(); return }
         if window.isKeyWindow { window.orderOut(nil) } else { show() }
     }
     private func show() {
