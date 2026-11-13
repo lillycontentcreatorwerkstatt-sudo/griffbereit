@@ -30,7 +30,7 @@ final class Dictation: ObservableObject {
         }
         guard session == id else { return }
         guard speech == .authorized else {
-            finish("Erlaube Projektfach unter Systemeinstellungen → Datenschutz & Sicherheit → Spracherkennung den Zugriff.")
+            finish("Erlaube Griffbereit unter Systemeinstellungen → Datenschutz & Sicherheit → Spracherkennung den Zugriff.")
             return
         }
         guard recognizer.supportsOnDeviceRecognition, recognizer.isAvailable else {
@@ -40,7 +40,7 @@ final class Dictation: ObservableObject {
         let allowed = await AVCaptureDevice.requestAccess(for: .audio)
         guard session == id else { return }
         guard allowed else {
-            finish("Erlaube Projektfach unter Systemeinstellungen → Datenschutz & Sicherheit → Mikrofon den Zugriff.")
+            finish("Erlaube Griffbereit unter Systemeinstellungen → Datenschutz & Sicherheit → Mikrofon den Zugriff.")
             return
         }
         let engine = AVAudioEngine()

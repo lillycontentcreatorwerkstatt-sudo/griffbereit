@@ -1,4 +1,4 @@
-# Projektfach
+# Griffbereit
 
 Eine deutschsprachige Menüleisten-App für den Mac. Kopiere einen Fund, suche ihn später über seinen Inhalt und lege ihn direkt im passenden Projektordner ab. Bei einem Screenshot landen das Bild und eine Markdown-Notiz mit dem lokal erkannten Text zusammen.
 
@@ -7,10 +7,10 @@ Eine deutschsprachige Menüleisten-App für den Mac. Kopiere einen Fund, suche i
 Für macOS 14 oder neuer mit einem aktuellen Swift-SDK (Xcode oder Apple Command Line Tools). Zum Bauen mit KI-Unterstützung ist das macOS-26-SDK oder neuer erforderlich. Das Skript baut für den gerade verwendeten Mac.
 
 ```sh
-git clone https://github.com/lillycontentcreatorwerkstatt-sudo/projektfach.git
-cd projektfach
+git clone https://github.com/lillycontentcreatorwerkstatt-sudo/griffbereit.git
+cd griffbereit
 ./scripts/build-app.sh
-open dist/Projektfach.app
+open dist/Griffbereit.app
 ```
 
 Bei einem privaten Repository benötigt der verwendete GitHub-Account Zugriff. Die App lässt sich nach dem Bauen auch im Finder öffnen oder nach „Programme“ ziehen.
@@ -19,21 +19,21 @@ Bei einem privaten Repository benötigt der verwendete GitHub-Account Zugriff. D
 
 **⌃⌥M** startet das deutsche Diktat aus einer anderen App. Drücke das Kürzel erneut, um die Aufnahme zu beenden. Für denselben Ablauf gibt es die Tasten **Diktieren** und **Diktat beenden**. Beim ersten Mal fragt macOS nach Spracherkennung und Mikrofon.
 
-Projektfach überarbeitet den erkannten Text mit Apple Intelligence auf dem Mac und speichert die Notiz im durchsuchbaren Verlauf. Ist ein Projektordner ausgewählt, wird die Fassung zusätzlich als Markdown-Datei dort abgelegt. Ohne verfügbares Modell oder bei einem Modellfehler bleibt das Transkript als Notiz erhalten. Die lokale KI benötigt macOS 26 oder neuer, einen dafür geeigneten Mac und aktiviertes Apple Intelligence. Beide globalen Tastenkürzel lassen sich in den Einstellungen ändern.
+Griffbereit überarbeitet den erkannten Text mit Apple Intelligence auf dem Mac und speichert die Notiz im durchsuchbaren Verlauf. Ist ein Projektordner ausgewählt, wird die Fassung zusätzlich als Markdown-Datei dort abgelegt. Ohne verfügbares Modell oder bei einem Modellfehler bleibt das Transkript als Notiz erhalten. Die lokale KI benötigt macOS 26 oder neuer, einen dafür geeigneten Mac und aktiviertes Apple Intelligence. Beide globalen Tastenkürzel lassen sich in den Einstellungen ändern.
 
 ## Screenshots und Kopiertes
 
-Während Projektfach läuft, sammelt es neue kopierte Texte und Finder-Dateiverweise automatisch. **Kopiertes sammeln** pausiert oder aktiviert die Erfassung. Der bei macOS eingestellte Screenshot-Ordner wird beim Start und beim Fortsetzen geöffnet. Erlaube bei Bedarf den von macOS angefragten Ordnerzugriff. Projektfach beobachtet neue Bildschirmfotos in diesem Ordner sowie Bilder in der Zwischenablage.
+Während Griffbereit läuft, sammelt es neue kopierte Texte und Finder-Dateiverweise automatisch. **Kopiertes sammeln** pausiert oder aktiviert die Erfassung. Der bei macOS eingestellte Screenshot-Ordner wird beim Start und beim Fortsetzen geöffnet. Erlaube bei Bedarf den von macOS angefragten Ordnerzugriff. Griffbereit beobachtet neue Bildschirmfotos in diesem Ordner sowie Bilder in der Zwischenablage.
 
 Bei einem neuen Bild erscheint eine Vorschau. **Nur Text** übernimmt den erkannten Text in den Verlauf. **Bild behalten** speichert das Bild als PNG. **Überspringen** verwirft die Anfrage. Das von macOS angelegte Screenshot-Original bleibt in seinem Ordner. Bei einem Bild ohne lesbaren Text kannst du weiterhin das Bild wählen.
 
-Setze den Cursor in ein Textfeld und drücke **⇧⌘J**. Auf dem Bildschirm am Mauszeiger erscheint eine kompakte Schnellauswahl, der Hintergrund wird leicht abgedunkelt. Ein Klick auf einen Eintrag setzt ihn am Cursor ein. Du kannst auch suchen und mit Pfeiltasten und **↩** auswählen. **Esc**, ein Klick außerhalb oder das Kürzel schließen die Auswahl. Direktes Einfügen benötigt die macOS-Freigabe unter **Datenschutz & Sicherheit → Bedienungshilfen → Projektfach**. Ohne Freigabe kopiert der Klick den Eintrag, den du mit **Esc** und **⌘V** einsetzt.
+Setze den Cursor in ein Textfeld und drücke **⇧⌘J**. Auf dem Bildschirm am Mauszeiger erscheint eine kompakte Schnellauswahl, der Hintergrund wird leicht abgedunkelt. Ein Klick auf einen Eintrag setzt ihn am Cursor ein. Du kannst auch suchen und mit Pfeiltasten und **↩** auswählen. **Esc**, ein Klick außerhalb oder das Kürzel schließen die Auswahl. Direktes Einfügen benötigt die macOS-Freigabe unter **Datenschutz & Sicherheit → Bedienungshilfen → Griffbereit**. Ohne Freigabe kopiert der Klick den Eintrag, den du mit **Esc** und **⌘V** einsetzt.
 
-Ein Klick auf das Projektfach-Symbol in der Menüleiste öffnet das Hauptfenster. **⌘↩** exportiert den gewählten Eintrag in den Projektordner. Bei Finder-Dateien werden die Originale erst beim Export kopiert.
+Ein Klick auf das Griffbereit-Symbol in der Menüleiste öffnet das Hauptfenster. **⌘↩** exportiert den gewählten Eintrag in den Projektordner. Bei Finder-Dateien werden die Originale erst beim Export kopiert.
 
 ## Einträge löschen
 
-Klicke auf das Projektfach-Symbol in der Menüleiste und öffne die **Zwischenablage**. Wähle einen Eintrag aus und klicke in seiner Vorschau auf **Eintrag löschen**. Für den gesamten aktiven Verlauf klicke über der Liste auf **Verlauf leeren …** und bestätige mit **Verlauf löschen**. Die Suche schränkt die vollständige Löschung nicht ein. Bereits exportierte Dateien und der aktuelle Inhalt der macOS-Zwischenablage bleiben erhalten.
+Klicke auf das Griffbereit-Symbol in der Menüleiste und öffne die **Zwischenablage**. Wähle einen Eintrag aus und klicke in seiner Vorschau auf **Eintrag löschen**. Für den gesamten aktiven Verlauf klicke über der Liste auf **Verlauf leeren …** und bestätige mit **Verlauf löschen**. Die Suche schränkt die vollständige Löschung nicht ein. Bereits exportierte Dateien und der aktuelle Inhalt der macOS-Zwischenablage bleiben erhalten.
 
 ## Verlauf und Privatsphäre
 
@@ -54,4 +54,4 @@ swift run FachChecks
 ./scripts/build-app.sh
 ```
 
-Der App-Code liegt unter `Sources/Projektfach`, der SQLite-Speicher und der Projektexport unter `Sources/FachCore`. Die automatisierten Tests verwenden Wegwerfordner und Arbeitsspeicher. Das Buildskript signiert lokal ad hoc. Eine eigene Signatur kann über `CODE_SIGN_IDENTITY` gesetzt werden.
+Der App-Code liegt unter `Sources/Griffbereit`, der SQLite-Speicher und der Projektexport unter `Sources/FachCore`. Die automatisierten Tests verwenden Wegwerfordner und Arbeitsspeicher. Das Buildskript signiert lokal ad hoc. Eine eigene Signatur kann über `CODE_SIGN_IDENTITY` gesetzt werden.

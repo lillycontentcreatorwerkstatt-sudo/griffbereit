@@ -2,13 +2,13 @@
 import PackageDescription
 
 let package = Package(
-    name: "Projektfach",
+    name: "Griffbereit",
     platforms: [.macOS(.v14)],
-    products: [.executable(name: "Projektfach", targets: ["Projektfach"])],
+    products: [.executable(name: "Griffbereit", targets: ["Griffbereit"])],
     targets: [
         .systemLibrary(name: "CSQLite"),
         .target(name: "FachCore", dependencies: ["CSQLite"]),
-        .executableTarget(name: "Projektfach", dependencies: ["FachCore"]),
+        .executableTarget(name: "Griffbereit", dependencies: ["FachCore"]),
         .executableTarget(name: "FachChecks", dependencies: ["FachCore"], path: "Tests/FachCoreTests")
     ]
 )

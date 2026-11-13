@@ -152,7 +152,7 @@ final class Desk: ObservableObject {
         do {
             if Date() >= nextCleanup { try tidy(); try refresh() }
             guard live, let archive else { return }
-            let blocked = "macOS blockiert die Zwischenablage. Erlaube Projektfach das Einsetzen aus anderen Apps in den Systemeinstellungen."
+            let blocked = "macOS blockiert die Zwischenablage. Erlaube Griffbereit das Einsetzen aus anderen Apps in den Systemeinstellungen."
             if #available(macOS 15.4, *), pb.accessBehavior == .alwaysDeny {
                 if captureNotice != blocked { captureNotice = blocked }
                 return

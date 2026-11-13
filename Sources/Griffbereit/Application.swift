@@ -32,7 +32,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
         updateIcon()
         window = NSWindow(contentRect: NSRect(x: 0, y: 0, width: 730, height: 465),
                           styleMask: [.titled, .closable, .resizable], backing: .buffered, defer: false)
-        window.title = "Projektfach"
+        window.title = "Griffbereit"
         window.isReleasedWhenClosed = false
         window.delegate = self
         window.contentView = NSHostingView(rootView: Surface(desk: desk, keys: keys, voiceKeys: voiceKeys))
@@ -52,7 +52,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
     }
 
     private func updateIcon() {
-        let label = desk.live ? "Projektfach, sammelt Kopiertes" : "Projektfach, Sammeln pausiert"
+        let label = desk.live ? "Griffbereit, sammelt Kopiertes" : "Griffbereit, Sammeln pausiert"
         let icon = NSImage(systemSymbolName: desk.live ? "tray.2.fill" : "tray.2", accessibilityDescription: label)
         icon?.isTemplate = true
         item.button?.image = icon
@@ -80,7 +80,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
 }
 
 @main
-enum ProjektfachApp {
+enum GriffbereitApp {
     @MainActor static func main() {
         let app = NSApplication.shared
         let delegate = AppDelegate()

@@ -36,7 +36,7 @@ struct Surface: View {
         VStack(spacing: 0) {
             HStack(spacing: 12) {
                 Image(systemName: "tray.2.fill").font(.title2).foregroundStyle(Color.accentColor)
-                Text("Projektfach").font(.title2.weight(.semibold))
+                Text("Griffbereit").font(.title2.weight(.semibold))
                 Spacer()
                 Button { desk.dictating = true } label: {
                     Label("Diktieren", systemImage: "mic.fill")
@@ -112,7 +112,7 @@ struct Surface: View {
                         .confirmationDialog("Aktuellen Verlauf vollständig löschen?", isPresented: $confirmClear) {
                             Button("Verlauf löschen", role: .destructive) { desk.erase(all: true) }
                         } message: {
-                            Text("Alle Einträge im aktuellen Projektfach-Verlauf werden gelöscht, auch ausgeblendete Suchtreffer.")
+                            Text("Alle Einträge im aktuellen Griffbereit-Verlauf werden gelöscht, auch ausgeblendete Suchtreffer.")
                         }
                         if desk.matches.isEmpty {
                             Text(desk.query.isEmpty ? (desk.live ? "Kopiere in einer anderen App Text, ein Bild oder eine Datei mit ⌘C." : "Diktiere eine Notiz oder aktiviere „Kopiertes sammeln“.") : "Keine passenden Einträge.")

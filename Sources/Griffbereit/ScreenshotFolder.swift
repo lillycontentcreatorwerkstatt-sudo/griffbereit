@@ -10,7 +10,7 @@ final class ScreenshotFolder {
         return FileManager.default.urls(for: .desktopDirectory, in: .userDomainMask)[0]
     }
 
-    private let queue = DispatchQueue(label: "Projektfach.screenshots", qos: .utility)
+    private let queue = DispatchQueue(label: "Griffbereit.screenshots", qos: .utility)
     private let source: DispatchSourceFileSystemObject
     private let folder: URL
     private let receive: (Data, String) -> Void

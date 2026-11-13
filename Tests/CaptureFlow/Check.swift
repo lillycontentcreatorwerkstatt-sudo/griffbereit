@@ -13,7 +13,7 @@ struct CaptureFlowCheck {
 
     @MainActor static func main() async throws {
         let board = NSPasteboard.withUniqueName()
-        let suite = "projektfach-check-" + UUID().uuidString
+        let suite = "griffbereit-check-" + UUID().uuidString
         let settings = UserDefaults(suiteName: suite)!
         settings.set(true, forKey: "session")
         let folder = FileManager.default.temporaryDirectory.appendingPathComponent(suite)
@@ -80,7 +80,7 @@ struct CaptureFlowCheck {
         testImage.lockFocus()
         NSColor.white.setFill()
         NSRect(x: 0, y: 0, width: 900, height: 150).fill()
-        ("Projektfach Bildprobe" as NSString).draw(at: NSPoint(x: 30, y: 40),
+        ("Griffbereit Bildprobe" as NSString).draw(at: NSPoint(x: 30, y: 40),
             withAttributes: [.font: NSFont.systemFont(ofSize: 50), .foregroundColor: NSColor.black])
         testImage.unlockFocus()
         let png = NSBitmapImageRep(data: testImage.tiffRepresentation!)!.representation(using: .png, properties: [:])!

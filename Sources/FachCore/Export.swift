@@ -4,7 +4,7 @@ public enum ProjectExport {
     public static func write(_ record: Record, data: Data, to root: URL) throws -> URL {
         let fm = FileManager.default
         let identifier = UUID().uuidString
-        let temporary = root.appendingPathComponent(".projektfach-" + identifier, isDirectory: true)
+        let temporary = root.appendingPathComponent(".griffbereit-" + identifier, isDirectory: true)
         try fm.createDirectory(at: temporary, withIntermediateDirectories: false)
         defer { if fm.fileExists(atPath: temporary.path) { try? fm.removeItem(at: temporary) } }
         let words = record.title.components(separatedBy: CharacterSet.alphanumerics.inverted).filter { !$0.isEmpty }
