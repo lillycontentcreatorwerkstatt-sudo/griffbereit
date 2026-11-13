@@ -26,7 +26,7 @@ struct KeyEditor: NSViewRepresentable {
 struct Surface: View {
     @ObservedObject var desk: Desk
     @ObservedObject var keys: HotKey
-    @State private var dictating = false
+    @ObservedObject var voiceKeys: HotKey
     @State private var settings = false
     @State private var confirmClear = false
     @FocusState private var searchFocus: Bool
@@ -37,9 +37,9 @@ struct Surface: View {
                 Image(systemName: "tray.2.fill").font(.title2).foregroundStyle(Color.accentColor)
                 Text("Projektfach").font(.title2.weight(.semibold))
                 Spacer()
-                Button { dictating = true } label: {
+                Button { desk.dictating = true } label: {
                     Label("Diktieren", systemImage: "mic.fill")
-                }.buttonStyle(.borderedProminent)
+                }.buttonStyle(.borderedProminent).help("Sprachnotiz starten oder beenden: " + voiceKeys.choice.label)
                 Button { settings = true } label: { Image(systemName: "gearshape") }
                     .accessibilityLabel("Einstellungen").help("Einstellungen")
             }.padding(16)
@@ -54,6 +54,32 @@ struct Surface: View {
                     if desk.live != enabled { desk.toggle() }
                 })).toggleStyle(.switch).controlSize(.small)
             }.padding(.horizontal, 14).padding(.vertical, 8)
+            if !desk.voiceNotice.isEmpty {
+                Text(desk.voiceNotice).font(.callout).padding(.horizontal, 14)
+            }
+            if !desk.folderNotice.isEmpty {
+                Text(desk.folderNotice).font(.callout).padding(.horizontal, 14)
+            }
+            if let choice = desk.images.first {
+                VStack(alignment: .leading, spacing: 8) {
+                    HStack {
+                        if let preview = NSImage(data: choice.png) {
+                            Image(nsImage: preview).resizable().scaledToFit().frame(width: 72, height: 50)
+                        }
+                        VStack(alignment: .leading) {
+                            Text("Wie möchtest du das Bild ablegen?").font(.headline)
+                            Text(choice.name).font(.caption).lineLimit(1)
+                        }
+                        Spacer()
+                    }
+                    HStack {
+                        Button(desk.imageBusy ? "Text wird erkannt …" : "Nur Text") { Task { await desk.keepImage(textOnly: true) } }
+                        Button("Bild behalten") { Task { await desk.keepImage(textOnly: false) } }
+                        Button("Überspringen") { desk.skipImage() }
+                    }.disabled(desk.imageBusy)
+                    if !desk.imageError.isEmpty { Text(desk.imageError).font(.callout) }
+                }.padding(12).frame(maxWidth: .infinity, alignment: .leading).background(.quaternary)
+            }
             if desk.live && !desk.captureNotice.isEmpty {
                 Text(desk.captureNotice).font(.callout).frame(maxWidth: .infinity, alignment: .leading).padding(.horizontal, 14)
             }
@@ -106,8 +132,7 @@ struct Surface: View {
                                 if row.kind == .image, let image = desk.preview(row) {
                                     Image(nsImage: image).resizable().scaledToFit().frame(maxHeight: 180).accessibilityLabel("Bildvorschau")
                                 }
-                                Text(desk.reading.contains(row.id) ? "Bildtext wird erkannt …" :
-                                     (row.searchable.isEmpty ? "Kein lesbarer Text." : row.searchable))
+                                Text(row.searchable)
                                     .textSelection(.enabled).frame(maxWidth: .infinity, alignment: .leading)
                             }.padding(20)
                         }.frame(maxWidth: .infinity)
@@ -133,7 +158,7 @@ struct Surface: View {
                     Button("Kopieren") { desk.use(paste: false) }.disabled(desk.current == nil)
                     Button(desk.exporting ? "Legt ab …" : "Im Projekt ablegen") { desk.export() }
                         .keyboardShortcut(.return, modifiers: .command).buttonStyle(.borderedProminent)
-                        .disabled(desk.current == nil || desk.exporting || desk.reading.contains(desk.selection ?? ""))
+                        .disabled(desk.current == nil || desk.exporting)
                 } else if !desk.destination.isEmpty {
                     Button("Ordner im Finder öffnen") { NSWorkspace.shared.open(URL(fileURLWithPath: desk.destination)) }
                 }
@@ -156,11 +181,13 @@ struct Surface: View {
         .onAppear { searchFocus = true }
         .onReceive(NotificationCenter.default.publisher(for: NSWindow.didBecomeKeyNotification)) { _ in if !settings { searchFocus = true } }
         .onExitCommand { desk.dismiss() }
-        .sheet(isPresented: $dictating) { DictationSheet(desk: desk) }
+        .sheet(isPresented: $desk.dictating) { DictationSheet(desk: desk) }
         .sheet(isPresented: $settings) {
             Form {
                 Section("Bedienung") { LabeledContent("Verlauf öffnen") { KeyEditor(keys: keys).frame(width: 142) }
+                    LabeledContent("Sprachnotiz starten / beenden") { KeyEditor(keys: voiceKeys).frame(width: 142) }
                     if !keys.problem.isEmpty { Text(keys.problem) }
+                    if !voiceKeys.problem.isEmpty { Text(voiceKeys.problem) }
                 }
                 Section("Aufbewahrung") {
                     Toggle("Nur für diese Sitzung speichern", isOn: Binding(get: { desk.sessionOnly }, set: { desk.mode(session: $0) }))
@@ -178,7 +205,7 @@ struct Surface: View {
                     Spacer()
                     Button("Fertig") { settings = false }.keyboardShortcut(.defaultAction)
                 }
-            }.formStyle(.grouped).frame(width: 480, height: 435)
+            }.formStyle(.grouped).frame(width: 480, height: 480)
             .confirmationDialog("Aktuellen Verlauf vollständig löschen?", isPresented: $confirmClear) {
                 Button("Verlauf löschen", role: .destructive) { desk.erase(all: true) }
             }

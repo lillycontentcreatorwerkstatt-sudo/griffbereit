@@ -15,8 +15,10 @@ public enum ProjectExport {
         case .text: try data.write(to: temporary.appendingPathComponent("Notiz.md"))
         case .image:
             try data.write(to: temporary.appendingPathComponent("Bild.png"))
-            let note = "![Gespeichertes Bild](Bild.png)\n\n" + record.searchable + "\n"
-            try Data(note.utf8).write(to: temporary.appendingPathComponent("Bildnotiz.md"))
+            if !record.searchable.isEmpty {
+                let note = "![Gespeichertes Bild](Bild.png)\n\n" + record.searchable + "\n"
+                try Data(note.utf8).write(to: temporary.appendingPathComponent("Bildnotiz.md"))
+            }
         case .files:
             let paths = try JSONDecoder().decode([String].self, from: data)
             guard !paths.isEmpty else { throw FachError("Der Eintrag enthält keine Dateien.") }

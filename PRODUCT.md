@@ -1,5 +1,5 @@
 # Projektfach
 
-Eine deutschsprachige Menüleisten-App für Menschen, die beim Arbeiten am Mac Texte, Bilder und Dateien für mehrere Projekte sammeln. Ein kopierter Fund lässt sich später suchen, erneut einsetzen oder in einem selbst gewählten Projektordner ablegen. Bei Bildern gehört der erkannte Text zum Fund.
+Projektfach sammelt neue Kopien auf dem Mac automatisch, solange die App läuft. Bei einem neuen Bildschirmfoto wählt die Nutzerin, ob der Verlauf das Bild oder ausschließlich den erkannten Text enthalten soll. Der Verlauf lässt sich durchsuchen und pausieren.
 
-Die erste Version setzt eine lokale Einzelplatznutzung voraus. Die Aufnahme lässt sich bewusst einschalten, pausieren und auf eine Sitzung begrenzen. Der Entwurf geht von häufiger Tastaturnutzung und wechselnden Projekten aus.
+Ein eigenes globales Kürzel startet und beendet eine Sprachnotiz. Die lokal überarbeitete Fassung steht anschließend zum Kopieren bereit und landet bei gewähltem Projektordner auch dort als Markdown. Die App zeigt an, wenn sie nur das Transkript speichern konnte.

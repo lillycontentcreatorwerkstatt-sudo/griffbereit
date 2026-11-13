@@ -19,8 +19,24 @@ final class Desk: ObservableObject {
     @Published var captureNotice = ""
     @Published var lastExport: URL?
     let browser = ProjectBrowser()
-    @Published var exporting = false
-    @Published var reading: Set<String> = []
+    private var exportCount = 0
+    @Published private(set) var exporting = false
+    struct ImageChoice: Identifiable {
+        let id = UUID()
+        let png: Data
+        let name: String
+    }
+    @Published private(set) var images: [ImageChoice] = []
+    @Published var imageBusy = false
+    @Published var voiceNotice = ""
+    @Published var imageError = ""
+    @Published var dictating = false
+    var stopDictation: () -> Void = {}
+    var showImageChoice: () -> Void = {}
+    private var watcher: ScreenshotFolder?
+    private let screenshotFolder: URL
+    private var watchID = UUID()
+    @Published var folderNotice = ""
     @Published var projects: [Project] = []
     @Published var destination = "" { didSet { defaults.set(destination, forKey: "destination") } }
     @Published private(set) var live = false
@@ -33,9 +49,6 @@ final class Desk: ObservableObject {
     private var clock: Timer?
     private var change = 0
     private var nextCleanup = Date.distantPast
-    private var generation = UUID()
-    private var pending: [String] = []
-    private var workerBusy = false
     var target: NSRunningApplication?
     var dismiss: () -> Void = {}
     var updateIcon: () -> Void = {}
@@ -47,7 +60,8 @@ final class Desk: ObservableObject {
     }
     var current: Record? { matches.first { $0.id == selection } }
 
-    init(pasteboard: NSPasteboard = .general, defaults: UserDefaults = .standard) {
+    init(pasteboard: NSPasteboard = .general, defaults: UserDefaults = .standard, screenshotFolder: URL = ScreenshotFolder.systemFolder) {
+        self.screenshotFolder = screenshotFolder
         self.pb = pasteboard
         self.defaults = defaults
         sessionOnly = defaults.bool(forKey: "session")
@@ -61,7 +75,7 @@ final class Desk: ObservableObject {
             archive = try makeArchive(session: sessionOnly)
             try tidy()
             try refresh()
-            live = defaults.bool(forKey: "capture")
+            live = defaults.object(forKey: "automaticCollection") as? Bool ?? true
         } catch { message = error.localizedDescription }
         change = pb.changeCount
         let timer = Timer(timeInterval: 0.45, repeats: true) { [weak self] _ in
@@ -69,6 +83,7 @@ final class Desk: ObservableObject {
         }
         RunLoop.main.add(timer, forMode: .common)
         clock = timer
+        updateWatcher()
     }
 
     deinit { clock?.invalidate() }
@@ -86,11 +101,9 @@ final class Desk: ObservableObject {
             let next = try makeArchive(session: session)
             try next.purge(before: Date().addingTimeInterval(-Double(days) * 86400))
             let entries = try next.list()
-            generation = UUID()
+            clearChoices()
             archive = next
             rows = entries
-            pending.removeAll()
-            reading.removeAll()
             sessionOnly = session
             defaults.set(session, forKey: "session")
             change = pb.changeCount
@@ -115,7 +128,8 @@ final class Desk: ObservableObject {
         live.toggle()
         captureNotice = ""
         if live { showingProject = false; query = "" }
-        defaults.set(live, forKey: "capture")
+        defaults.set(live, forKey: "automaticCollection")
+        updateWatcher()
         updateIcon()
     }
 
@@ -167,11 +181,8 @@ final class Desk: ObservableObject {
                 try archive.save(.text, payload: Data(text.utf8), title: title, words: text)
             } else if let png = Self.png(pb) {
                 guard png.count <= 12 * 1024 * 1024 else { captureNotice = "Bild über 12 MiB übersprungen."; return }
-                let id = try archive.save(.image, payload: png, title: "Bild")
-                if !reading.contains(id), rows.first(where: { $0.id == id })?.searchable.isEmpty != false {
-                    reading.insert(id)
-                    pending.append(id)
-                }
+                offerImage(png, name: "Bild aus der Zwischenablage")
+                return
             } else {
                 captureNotice = "Kein lesbarer Inhalt. Kopiere Text, ein Bild oder eine Datei mit ⌘C. Falls macOS nachfragt, erlaube den Zugriff."
                 return
@@ -179,7 +190,6 @@ final class Desk: ObservableObject {
             let followNewest = selection == nil || selection == matches.first?.id
             try refresh()
             if followNewest { selection = matches.first?.id }
-            runOCR()
         } catch { message = error.localizedDescription }
     }
 
@@ -190,30 +200,76 @@ final class Desk: ObservableObject {
         return bitmap.representation(using: .png, properties: [:])
     }
 
-    private func runOCR() {
-        guard !workerBusy, let store = archive, !pending.isEmpty else { return }
-        let id = pending.removeFirst()
-        guard let bytes = try? store.data(id) else { reading.remove(id); runOCR(); return }
-        let generation = self.generation
-        workerBusy = true
-        DispatchQueue.global(qos: .utility).async {
-            let request = VNRecognizeTextRequest()
-            request.recognitionLevel = .accurate
-            request.automaticallyDetectsLanguage = true
-            let result = Result { () -> String in
-                try VNImageRequestHandler(data: bytes).perform([request])
-                return (request.results ?? []).compactMap { $0.topCandidates(1).first?.string }.joined(separator: "\n")
-            }
-            DispatchQueue.main.async {
-                if self.generation == generation, let store = self.archive {
-                    do { try store.setWords(result.get(), id: id); try self.refresh() }
-                    catch { self.message = "Bildtext: " + error.localizedDescription }
-                    self.reading.remove(id)
+    private func updateWatcher() {
+        watcher = nil
+        watchID = UUID()
+        let id = watchID
+        folderNotice = ""
+        guard live else { clearChoices(); return }
+        do {
+            watcher = try ScreenshotFolder(folder: screenshotFolder) { [weak self] png, name in
+                DispatchQueue.main.async {
+                    guard let self, self.watchID == id else { return }
+                    self.offerImage(png, name: name)
                 }
-                self.workerBusy = false
-                self.runOCR()
+            } report: { [weak self] warning in
+                DispatchQueue.main.async { if self?.watchID == id { self?.folderNotice = warning } }
             }
+        } catch {
+            folderNotice = "Kein Zugriff auf den Screenshot-Ordner „" + screenshotFolder.lastPathComponent + "“. Prüfe den Ordnerzugriff in den Systemeinstellungen."
         }
+    }
+
+    private func clearChoices() {
+        images = []
+        imageBusy = false
+        imageError = ""
+    }
+
+    private func offerImage(_ png: Data, name: String) {
+        guard live, !images.contains(where: { $0.png == png }) else { return }
+        guard png.count <= 12 * 1024 * 1024, images.count < 12 else {
+            captureNotice = "Bild übersprungen: maximal 12 MiB pro Bild und 12 offene Entscheidungen."
+            return
+        }
+        images.append(ImageChoice(png: png, name: name))
+        if images.count == 1 { showImageChoice() }
+    }
+
+    func skipImage() {
+        guard !images.isEmpty, !imageBusy else { return }
+        images.removeFirst()
+        imageError = ""
+    }
+
+    func keepImage(textOnly: Bool) async {
+        guard !imageBusy, let choice = images.first, let archive else { return }
+        imageBusy = true
+        imageError = ""
+        defer { if images.first?.id == choice.id || images.isEmpty { imageBusy = false } }
+        do {
+            if textOnly {
+                let words = try await Task.detached(priority: .userInitiated) {
+                    let request = VNRecognizeTextRequest()
+                    request.recognitionLevel = .accurate
+                    request.automaticallyDetectsLanguage = true
+                    try VNImageRequestHandler(data: choice.png).perform([request])
+                    return (request.results ?? []).compactMap { $0.topCandidates(1).first?.string }.joined(separator: "\n")
+                }.value
+                guard images.first?.id == choice.id else { return }
+                guard !words.isEmpty else { throw FachError("Kein Text erkannt. Du kannst das Bild behalten oder überspringen.") }
+                try saveNote(words)
+            } else {
+                let id = try archive.save(.image, payload: choice.png, title: choice.name)
+                query = ""
+                try refresh()
+                selection = id
+                showingProject = false
+                message = "Bild im Verlauf gespeichert."
+            }
+            imageBusy = false
+            skipImage()
+        } catch { if images.first?.id == choice.id { imageError = error.localizedDescription } }
     }
 
     func saveNote(_ draft: String) throws {
@@ -250,18 +306,20 @@ final class Desk: ObservableObject {
         if browse { browser.load(destination) }
     }
 
-    func export() {
-        guard !exporting, let record = current, !reading.contains(record.id), let store = archive else { return }
+    func export(automatic: Bool = false) {
+        guard automatic || !exporting, let record = current, let store = archive else { return }
         if destination.isEmpty { addProject(browse: false) }
         guard !destination.isEmpty else { return }
         do {
             let data = try store.data(record.id)
             let root = URL(fileURLWithPath: destination)
+            exportCount += 1
             exporting = true
             DispatchQueue.global(qos: .userInitiated).async {
                 let result = Result { try ProjectExport.write(record, data: data, to: root) }
                 DispatchQueue.main.async {
-                    self.exporting = false
+                    self.exportCount -= 1
+                    self.exporting = self.exportCount > 0
                     do {
                         let folder = try result.get()
                         self.lastExport = folder

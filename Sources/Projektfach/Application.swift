@@ -7,10 +7,22 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
     private var window: NSWindow!
     private var desk: Desk!
     private var keys: HotKey!
+    private var voiceKeys: HotKey!
 
     func applicationDidFinishLaunching(_ notification: Notification) {
         desk = Desk()
         keys = HotKey { [weak self] in self?.toggleWindow() }
+        voiceKeys = HotKey(identifier: 2, initial: .voice) { [weak self] in
+            guard let self else { return }
+            if desk.dictating { desk.stopDictation(); return }
+            show()
+            guard window.attachedSheet == nil else { NSSound.beep(); return }
+            desk.dictating = true
+        }
+        desk.showImageChoice = { [weak self] in
+            guard let self, !desk.dictating, window.attachedSheet == nil else { return }
+            show()
+        }
         item = NSStatusBar.system.statusItem(withLength: NSStatusItem.squareLength)
         item.button?.target = self
         item.button?.action = #selector(toggleWindow)
@@ -22,7 +34,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
         window.title = "Projektfach"
         window.isReleasedWhenClosed = false
         window.delegate = self
-        window.contentView = NSHostingView(rootView: Surface(desk: desk, keys: keys))
+        window.contentView = NSHostingView(rootView: Surface(desk: desk, keys: keys, voiceKeys: voiceKeys))
         window.center()
         window.setFrameAutosaveName("Projektfach.Fenster")
         let menu = NSMenu()

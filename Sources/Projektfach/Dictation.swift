@@ -111,41 +111,66 @@ final class Dictation: ObservableObject {
 struct DictationSheet: View {
     @ObservedObject var desk: Desk
     @StateObject private var dictation = Dictation()
+    @State private var saving = false
+    @State private var pipeline: Task<Void, Never>?
     @Environment(\.dismiss) private var dismiss
+
+    private func save(_ raw: String) {
+        guard !saving, !raw.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else { return }
+        saving = true
+        pipeline = Task { @MainActor in
+            var text = raw
+            var warning = ""
+            do { text = try await NoteRewrite.polish(raw) }
+            catch { warning = "Originaltext gespeichert. KI-Überarbeitung: " + error.localizedDescription }
+            guard !Task.isCancelled else { return }
+            do {
+                try desk.saveNote(text)
+                if !desk.destination.isEmpty { desk.export(automatic: true) }
+                desk.voiceNotice = warning
+                dismiss()
+            } catch { dictation.notice = error.localizedDescription }
+            saving = false
+        }
+    }
 
     var body: some View {
         VStack(alignment: .leading, spacing: 14) {
             Label("Notiz diktieren", systemImage: "mic").font(.title2.weight(.semibold))
+            if saving { ProgressView("Sprachnotiz wird überarbeitet und abgelegt …") } else {
             switch dictation.phase {
             case .preparing: Text("Spracherkennung und Mikrofon werden vorbereitet …")
             case .listening: Label("Mikrofon an · Sprich jetzt.", systemImage: "waveform").foregroundStyle(.red)
             case .finishing: Text("Text wird fertiggestellt …")
-            case .ready: Text(dictation.text.isEmpty ? "Diktiere eine kurze Notiz oder gib Text ein." : "Du kannst den Text vor dem Speichern korrigieren.")
+            case .ready: Text(dictation.text.isEmpty ? "Diktiere eine kurze Notiz oder gib Text ein." : "Überarbeite den Entwurf oder lege ihn mit der lokalen KI ab.")
+            }
             }
             TextEditor(text: $dictation.text)
                 .accessibilityLabel("Notiztext").font(.body)
-                .disabled(dictation.phase != .ready)
+                .disabled(saving || dictation.phase != .ready)
                 .border(Color.secondary.opacity(0.3))
             if !dictation.notice.isEmpty { Text(dictation.notice).font(.callout).textSelection(.enabled) }
             HStack {
-                Button("Abbrechen") { dictation.finish(); dismiss() }
+                Button("Abbrechen") { pipeline?.cancel(); dictation.finish(); dismiss() }
                 Spacer()
                 if dictation.phase == .listening {
                     Button("Diktat beenden") { dictation.stop() }.buttonStyle(.borderedProminent)
                 } else if dictation.phase == .ready && dictation.text.isEmpty {
                     Button("Diktat starten") { Task { await dictation.start() } }
                 } else {
-                    Button("Notiz übernehmen") {
-                        do {
-                            try desk.saveNote(dictation.text)
-                            dismiss()
-                        } catch { dictation.notice = error.localizedDescription }
-                    }.buttonStyle(.borderedProminent)
-                        .disabled(dictation.phase != .ready || dictation.text.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
+                    Button("Überarbeiten und ablegen") { save(dictation.text) }
+                        .buttonStyle(.borderedProminent)
+                        .disabled(saving || dictation.phase != .ready || dictation.text.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
                 }
             }
         }.padding(20).frame(width: 500, height: 320)
-        .task { await dictation.start() }
-        .onDisappear { dictation.finish() }
+        .task {
+            desk.stopDictation = { dictation.stop() }
+            await dictation.start()
+        }
+        .onChange(of: dictation.phase) { old, new in
+            if new == .ready && (old == .finishing || old == .listening) { save(dictation.text) }
+        }
+        .onDisappear { pipeline?.cancel(); desk.stopDictation = {}; dictation.finish() }
     }
 }

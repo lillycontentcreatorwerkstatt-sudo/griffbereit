@@ -3,15 +3,15 @@ import FachCore
 
 @main
 struct CaptureFlowCheck {
-    @MainActor static func wait(_ description: String, until predicate: () -> Bool) throws {
+    @MainActor static func wait(_ description: String, until predicate: () -> Bool) async throws {
         let limit = Date().addingTimeInterval(5)
         while !predicate(), Date() < limit {
-            RunLoop.main.run(until: Date().addingTimeInterval(0.05))
+            try await Task.sleep(for: .milliseconds(50))
         }
         guard predicate() else { throw FachError(description) }
     }
 
-    @MainActor static func main() throws {
+    @MainActor static func main() async throws {
         let board = NSPasteboard.withUniqueName()
         let suite = "projektfach-check-" + UUID().uuidString
         let settings = UserDefaults(suiteName: suite)!
@@ -23,44 +23,65 @@ struct CaptureFlowCheck {
             settings.removePersistentDomain(forName: suite)
             try? FileManager.default.removeItem(at: folder)
         }
-        let desk = Desk(pasteboard: board, defaults: settings)
+        let desk = Desk(pasteboard: board, defaults: settings, screenshotFolder: folder)
         func copy(_ text: String) {
             board.clearContents()
             board.setString(text, forType: .string)
         }
-        copy("Vor dem Start")
-        desk.toggle()
+        guard desk.live else { throw FachError("Automatisches Sammeln ist beim Start aus") }
         copy("Erster Fund")
-        try wait("Erste Kopie erscheint nicht") { desk.current?.title == "Erster Fund" }
+        try await wait("Erste Kopie erscheint nicht") { desk.current?.title == "Erster Fund" }
         copy("Zweiter Fund")
-        try wait("Neue Kopie fehlt in der Vorschau") { desk.rows.count == 2 && desk.current?.title == "Zweiter Fund" }
+        try await wait("Neue Kopie fehlt in der Vorschau") { desk.rows.count == 2 && desk.current?.title == "Zweiter Fund" }
         desk.chooseProject(folder)
-        try wait("Ordner konnte nicht gelesen werden") { !desk.browser.loading }
+        try await wait("Ordner konnte nicht gelesen werden") { !desk.browser.loading }
         guard desk.showingProject, desk.browser.entries.isEmpty, desk.browser.error.isEmpty else {
             throw FachError("Falscher Zustand für leeres Projekt")
         }
         desk.showingProject = false
         desk.export()
-        try wait("Ablage fehlt") { desk.lastExport != nil }
+        try await wait("Ablage fehlt") { desk.lastExport != nil }
         guard let saved = desk.lastExport, try String(contentsOf: saved.appendingPathComponent("Notiz.md"), encoding: .utf8) == "Zweiter Fund" else {
             throw FachError("Exportierter Inhalt falsch")
         }
         desk.chooseProject(folder)
-        try wait("Ablage im Projektordner unsichtbar") { desk.browser.entries.first?.url.lastPathComponent == saved.lastPathComponent }
+        try await wait("Ablage im Projektordner unsichtbar") { desk.browser.entries.first?.url.lastPathComponent == saved.lastPathComponent }
         desk.toggle()
         copy("Während der Pause")
-        RunLoop.main.run(until: Date().addingTimeInterval(0.8))
+        try await Task.sleep(for: .milliseconds(800))
         guard desk.rows.count == 2 else { throw FachError("Aufnahme läuft trotz Pause") }
         desk.query = "Alter Suchfilter"
         try desk.saveNote("  Eine diktierte Idee.  ")
         guard !desk.live, desk.query.isEmpty, desk.current?.searchable == "Eine diktierte Idee.",
               desk.rows.count == 3, !desk.showingProject else { throw FachError("Diktat im Verlauf fehlt") }
         desk.export()
-        try wait("Diktat wurde nicht exportiert") { desk.lastExport != nil }
+        try await wait("Diktat wurde nicht exportiert") { desk.lastExport != nil }
         guard let note = desk.lastExport, try String(contentsOf: note.appendingPathComponent("Notiz.md"), encoding: .utf8) == "Eine diktierte Idee." else {
             throw FachError("Diktat im Projektordner fehlerhaft")
         }
         print("✓ Diktattext übernehmen und bei pausierter Zwischenablage als Markdown ablegen")
+        desk.toggle()
+        let testImage = NSImage(size: NSSize(width: 900, height: 150))
+        testImage.lockFocus()
+        NSColor.white.setFill()
+        NSRect(x: 0, y: 0, width: 900, height: 150).fill()
+        ("Projektfach Bildprobe" as NSString).draw(at: NSPoint(x: 30, y: 40),
+            withAttributes: [.font: NSFont.systemFont(ofSize: 50), .foregroundColor: NSColor.black])
+        testImage.unlockFocus()
+        let png = NSBitmapImageRep(data: testImage.tiffRepresentation!)!.representation(using: .png, properties: [:])!
+        let before = desk.rows.count
+        try png.write(to: folder.appendingPathComponent("Bildschirmfoto 2026-11-13.png"), options: .atomic)
+        try await wait("Screenshot-Datei löst keine Nachfrage aus") { desk.images.count == 1 }
+        guard desk.rows.count == before else { throw FachError("Bild vor Entscheidung gespeichert") }
+        await desk.keepImage(textOnly: true)
+        guard desk.current?.searchable.localizedCaseInsensitiveContains("Bildprobe") == true else { throw FachError("OCR: " + desk.imageError + " / " + (desk.current?.title ?? "leer")) }
+        guard !desk.rows.contains(where: { $0.kind == .image }) else { throw FachError("Bild bei Nur Text gespeichert") }
+        board.clearContents()
+        board.setData(png, forType: .png)
+        try await wait("Bild aus Zwischenablage fehlt") { desk.images.count == 1 }
+        await desk.keepImage(textOnly: false)
+        try await wait("Bild nicht gespeichert") { desk.current?.kind == .image }
+        print("✓ Screenshot-Datei, OCR ohne Bildspeicherung und Bildwahl aus der Zwischenablage")
         print("✓ Aufnehmen, neue Auswahl, Ordnerwahl, Export, Ordneransicht und Pause")
     }
 }

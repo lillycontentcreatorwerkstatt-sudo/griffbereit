@@ -6,5 +6,5 @@ trap 'rm -rf "$stage"' EXIT
 xcrun swiftc -parse-as-library -emit-library -emit-module -module-name FachCore \
   -I Sources/CSQLite Sources/FachCore/*.swift -emit-module-path "$stage/FachCore.swiftmodule" -o "$stage/libFachCore.dylib"
 xcrun swiftc -parse-as-library -I "$stage" -I Sources/CSQLite -L "$stage" -lFachCore \
-  Sources/Projektfach/Desk.swift Sources/Projektfach/ProjectBrowser.swift Tests/CaptureFlow/Check.swift -o "$stage/CaptureFlow"
+  Sources/Projektfach/Desk.swift Sources/Projektfach/ScreenshotFolder.swift Sources/Projektfach/ProjectBrowser.swift Tests/CaptureFlow/Check.swift -o "$stage/CaptureFlow"
 "$stage/CaptureFlow"

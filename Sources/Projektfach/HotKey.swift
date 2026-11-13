@@ -5,6 +5,7 @@ struct KeyChoice: Codable {
     var code: UInt32
     var modifiers: UInt32
     var label: String
+    static let voice = KeyChoice(code: UInt32(kVK_ANSI_M), modifiers: UInt32(controlKey | optionKey), label: "⌃⌥M")
     static let initial = KeyChoice(code: UInt32(kVK_ANSI_J), modifiers: UInt32(cmdKey | shiftKey), label: "⇧⌘J")
 }
 
@@ -15,7 +16,12 @@ final class HotKey: ObservableObject {
     private var handler: EventHandlerRef?
     let perform: () -> Void
 
-    init(perform: @escaping () -> Void) {
+    private let identifier: UInt32
+    private let storageKey: String
+
+    init(identifier: UInt32 = 1, initial: KeyChoice = .initial, perform: @escaping () -> Void) {
+        self.identifier = identifier
+        self.storageKey = identifier == 1 ? "keyChoice" : "voiceKeyChoice"
         self.perform = perform
         var type = EventTypeSpec(eventClass: OSType(kEventClassKeyboard), eventKind: UInt32(kEventHotKeyPressed))
         let status = InstallEventHandler(GetApplicationEventTarget(), { _, event, context in
@@ -24,25 +30,28 @@ final class HotKey: ObservableObject {
             let status = GetEventParameter(event, EventParamName(kEventParamDirectObject), EventParamType(typeEventHotKeyID),
                                           nil, MemoryLayout<EventHotKeyID>.size, nil, &id)
             guard status == noErr, id.signature == 0x50464B59 else { return OSStatus(eventNotHandledErr) }
-            Unmanaged<HotKey>.fromOpaque(context).takeUnretainedValue().perform()
+            let key = Unmanaged<HotKey>.fromOpaque(context).takeUnretainedValue()
+            guard id.id == key.identifier else { return OSStatus(eventNotHandledErr) }
+            key.perform()
             return noErr
         }, 1, &type, Unmanaged.passUnretained(self).toOpaque(), &handler)
         guard status == noErr else { problem = "Die globale Tastatursteuerung ist nicht verfügbar."; return }
-        let stored = UserDefaults.standard.data(forKey: "keyChoice").flatMap { try? JSONDecoder().decode(KeyChoice.self, from: $0) }
-        register(stored ?? .initial)
+        let stored = UserDefaults.standard.data(forKey: storageKey).flatMap { try? JSONDecoder().decode(KeyChoice.self, from: $0) }
+        choice = stored ?? initial
+        register(choice)
     }
 
     func register(_ next: KeyChoice) {
         if ref != nil, next.code == choice.code, next.modifiers == choice.modifiers { problem = ""; return }
         var replacement: EventHotKeyRef?
-        let status = RegisterEventHotKey(next.code, next.modifiers, EventHotKeyID(signature: 0x50464B59, id: 1),
+        let status = RegisterEventHotKey(next.code, next.modifiers, EventHotKeyID(signature: 0x50464B59, id: identifier),
                                          GetApplicationEventTarget(), 0, &replacement)
         guard status == noErr else { problem = "Dieses Kürzel ist belegt. Wähle ein anderes."; return }
         if let ref { UnregisterEventHotKey(ref) }
         ref = replacement
         choice = next
         problem = ""
-        UserDefaults.standard.set(try? JSONEncoder().encode(next), forKey: "keyChoice")
+        UserDefaults.standard.set(try? JSONEncoder().encode(next), forKey: storageKey)
     }
     deinit {
         if let ref { UnregisterEventHotKey(ref) }
