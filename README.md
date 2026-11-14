@@ -2,7 +2,9 @@
 
 Erst kopierst du einen Link, dann eine Adresse. In Mail brauchst du den Link wieder. Drücke **⇧⌘J**, tippe ein Wort und klicke auf den Treffer. Griffbereit setzt ihn dort ein, wo dein Cursor steht. Die deutschsprachige Menüleisten-App von Lilly sammelt auch Screenshots und verwandelt diktierte Ideen in durchsuchbare Notizen.
 
-**[Mac-App und Handbuch herunterladen (.zip)](https://github.com/lillycontentcreatorwerkstatt-sudo/griffbereit/releases/download/v0.4.4/Griffbereit-0.4.4-Testversion-Apple-Silicon.zip)** · [Handbuch als PDF](https://github.com/lillycontentcreatorwerkstatt-sudo/griffbereit/releases/download/v0.4.3/Griffbereit-0.4.3-Handbuch.pdf) · [Änderungen](CHANGELOG.md)
+**[Mac-App und Handbuch herunterladen (.zip)](https://github.com/lillycontentcreatorwerkstatt-sudo/griffbereit/releases/download/v0.4.4/Griffbereit-0.4.4-Testversion-Apple-Silicon.zip)** · [Handbuch als PDF](https://github.com/lillycontentcreatorwerkstatt-sudo/griffbereit/releases/download/v0.4.3/Griffbereit-0.4.3-Handbuch.pdf) · [Einsteiger-Anleitung mit KI-Hilfe (PDF)](https://github.com/lillycontentcreatorwerkstatt-sudo/griffbereit/releases/download/v0.4.4/Griffbereit-Einsteiger-Anleitung.pdf) · [Änderungen](CHANGELOG.md)
+
+Neu am Mac? Die **Einsteiger-Anleitung** führt dich Schritt für Schritt durch Installation, Freigaben und Einstellungen – allein oder mit Hilfe einer KI wie ChatGPT, Claude oder Gemini.
 
 ## Installieren und ausprobieren
 
