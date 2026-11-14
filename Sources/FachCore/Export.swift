@@ -9,7 +9,10 @@ public enum ProjectExport {
         defer { if fm.fileExists(atPath: temporary.path) { try? fm.removeItem(at: temporary) } }
         let words = record.title.components(separatedBy: CharacterSet.alphanumerics.inverted).filter { !$0.isEmpty }
         let label = String(words.prefix(6).joined(separator: "-").prefix(48))
-        let day = ISO8601DateFormatter().string(from: record.date).prefix(10)
+        let formatter = ISO8601DateFormatter()
+        formatter.timeZone = .current
+        formatter.formatOptions = [.withFullDate]
+        let day = formatter.string(from: record.date)
         let target = root.appendingPathComponent("\(day) \(label.isEmpty ? "Fund" : label) \(identifier.prefix(8))")
         switch record.kind {
         case .text: try data.write(to: temporary.appendingPathComponent("Notiz.md"))

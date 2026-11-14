@@ -151,7 +151,7 @@ struct DictationSheet: View {
                 .border(Color.secondary.opacity(0.3))
             if !dictation.notice.isEmpty { Text(dictation.notice).font(.callout).textSelection(.enabled) }
             HStack {
-                Button("Abbrechen") { pipeline?.cancel(); dictation.finish(); dismiss() }
+                Button("Abbrechen") { pipeline?.cancel(); dictation.text = ""; dictation.finish(); dismiss() }
                 Spacer()
                 if dictation.phase == .listening {
                     Button("Diktat beenden") { dictation.stop() }.buttonStyle(.borderedProminent)

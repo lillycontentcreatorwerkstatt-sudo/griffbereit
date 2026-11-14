@@ -100,6 +100,18 @@ final class ArchiveChecks {
         try equal(try Data(contentsOf: folder.appendingPathComponent("Notiz.md")), bytes)
         try equal(folder.deletingLastPathComponent().path, root.path)
     }
+
+    func testExportFolderUsesLocalDay() throws {
+        let root = try directory()
+        let store = try Archive()
+        let bytes = Data("Nachts".utf8)
+        let night = Calendar.current.startOfDay(for: Date()).addingTimeInterval(1800)
+        try store.save(.text, payload: bytes, title: "Nachts", now: night)
+        let folder = try ProjectExport.write(try first(store.list().first), data: bytes, to: root)
+        let parts = Calendar.current.dateComponents([.year, .month, .day], from: night)
+        let expected = String(format: "%04d-%02d-%02d ", parts.year ?? 0, parts.month ?? 0, parts.day ?? 0)
+        try equal(folder.lastPathComponent.hasPrefix(expected), true)
+    }
 }
 
 do {
@@ -116,6 +128,8 @@ do {
     print("✓ testMissingSecondFileLeavesNoPartialExport")
     try checks.testTextExportIsByteExact()
     print("✓ testTextExportIsByteExact")
+    try checks.testExportFolderUsesLocalDay()
+    print("✓ testExportFolderUsesLocalDay")
 } catch {
     FileHandle.standardError.write(Data("Fehlgeschlagen: \(error)\n".utf8))
     exit(1)

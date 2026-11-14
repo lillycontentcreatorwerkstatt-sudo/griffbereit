@@ -73,3 +73,5 @@ open dist/Griffbereit.app
 ## Lizenz
 
 Griffbereit steht unter der [MIT-Lizenz](LICENSE). Du darfst den Code verwenden, verändern und weitergeben, auch kommerziell. Bei Kopien und wesentlichen Teilen müssen Copyright- und Lizenzhinweis erhalten bleiben.
+
+Griffbereit ist ein privates, kostenloses Projekt ohne Support-Anspruch. Die Nutzung erfolgt auf eigene Verantwortung; es gibt keine Gewährleistung, und die Haftung ist ausgeschlossen, soweit das gesetzlich zulässig ist.
