@@ -6,8 +6,8 @@
 <key>CFBundleName</key><string>Griffbereit</string>
 <key>CFBundleDisplayName</key><string>Griffbereit</string>
 <key>CFBundlePackageType</key><string>APPL</string>
-<key>CFBundleVersion</key><string>7</string>
-<key>CFBundleShortVersionString</key><string>0.4.1</string>
+<key>CFBundleVersion</key><string>9</string>
+<key>CFBundleShortVersionString</key><string>0.4.3</string>
 <key>LSMinimumSystemVersion</key><string>14.0</string>
 <key>LSUIElement</key><true/>
 <key>NSDownloadsFolderUsageDescription</key><string>Griffbereit erkennt neue Bildschirmfotos im konfigurierten Screenshot-Ordner und fragt, wie sie abgelegt werden sollen.</string>

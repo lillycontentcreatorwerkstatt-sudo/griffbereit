@@ -368,23 +368,68 @@ final class Desk: ObservableObject {
     func use(paste: Bool) {
         guard let record = current else { return }
         do {
-            try copyToPasteboard(record)
-            guard paste, let target, !target.isTerminated else { message = "Kopiert. Mit ⌘V einsetzen."; return }
-            guard AXIsProcessTrusted() else { message = "Kopiert. Nutze ⌘V oder erlaube Direkt-Einfügen unter Bedienungshilfen."; return }
-            dismiss()
-            pasteInto(target)
+            if paste {
+                guard let target else { throw FachError("Öffne die Schnellauswahl aus der App, in die du einfügen möchtest.") }
+                try insert(record, into: target, dismiss: dismiss)
+            } else {
+                try copyToPasteboard(record)
+                message = "Kopiert."
+            }
         } catch { message = error.localizedDescription }
     }
 
-    func pasteInto(_ target: NSRunningApplication) {
+    static func openPasteSettings() {
+        if let url = URL(string: "x-apple.systempreferences:com.apple.preference.security?Privacy_Accessibility") {
+            NSWorkspace.shared.open(url)
+        }
+    }
+
+    static var canPaste: Bool { AXIsProcessTrusted() || CGPreflightPostEventAccess() }
+
+    private func pressPasteMenu(in target: NSRunningApplication) -> Bool {
+        func attribute(_ element: AXUIElement, _ name: String) -> CFTypeRef? {
+            var value: CFTypeRef?
+            guard AXUIElementCopyAttributeValue(element, name as CFString, &value) == .success else { return nil }
+            return value
+        }
+        func children(_ element: AXUIElement) -> [AXUIElement] {
+            attribute(element, kAXChildrenAttribute) as? [AXUIElement] ?? []
+        }
+        let app = AXUIElementCreateApplication(target.processIdentifier)
+        AXUIElementSetMessagingTimeout(app, 0.25)
+        guard let bar = attribute(app, kAXMenuBarAttribute), CFGetTypeID(bar) == AXUIElementGetTypeID() else { return false }
+        for group in children(bar as! AXUIElement) {
+            guard let name = attribute(group, kAXTitleAttribute) as? String,
+                  ["Bearbeiten", "Edit", "Édition", "Modifica", "Edición"].contains(name) else { continue }
+            for menu in children(group) {
+                for item in children(menu) {
+                    guard (attribute(item, kAXMenuItemCmdCharAttribute) as? String)?.lowercased() == "v",
+                          attribute(item, kAXMenuItemCmdModifiersAttribute) as? Int == 0,
+                          attribute(item, kAXEnabledAttribute) as? Bool == true else { continue }
+                    return AXUIElementPerformAction(item, kAXPressAction as CFString) == .success
+                }
+            }
+        }
+        return false
+    }
+
+    func insert(_ record: Record, into target: NSRunningApplication, dismiss: () -> Void) throws {
+        guard !target.isTerminated else { throw FachError("Die Ziel-App wurde beendet.") }
+        guard Self.canPaste else {
+            throw FachError("macOS gibt dieser App-Kopie noch keinen Zugriff. Ist Griffbereit bereits eingeschaltet? Entferne den alten Eintrag mit Minus und füge die unter „App im Finder zeigen“ markierte Kopie mit Plus hinzu. Starte Griffbereit danach neu.")
+        }
+        try copyToPasteboard(record)
         let copiedChange = pb.changeCount
+        dismiss()
         if !target.isActive { target.activate(options: []) }
         Task { @MainActor in
-            for _ in 0..<20 {
-                try? await Task.sleep(for: .milliseconds(30))
+            for _ in 0..<30 {
+                try? await Task.sleep(for: .milliseconds(35))
                 guard pb.changeCount == copiedChange, !target.isTerminated else { return }
                 if target.isActive {
-                    guard let down = CGEvent(keyboardEventSource: nil, virtualKey: 9, keyDown: true),
+                    if AXIsProcessTrusted(), pressPasteMenu(in: target) { return }
+                    guard target.isActive, pb.changeCount == copiedChange, CGPreflightPostEventAccess(),
+                          let down = CGEvent(keyboardEventSource: nil, virtualKey: 9, keyDown: true),
                           let up = CGEvent(keyboardEventSource: nil, virtualKey: 9, keyDown: false) else { break }
                     down.flags = .maskCommand
                     up.flags = .maskCommand
@@ -393,7 +438,10 @@ final class Desk: ObservableObject {
                     return
                 }
             }
-            message = "Kopiert. Aktiviere das Zielfenster und füge mit ⌘V ein."
+            let alert = NSAlert()
+            alert.messageText = "Einfügen in " + (target.localizedName ?? "die Ziel-App") + " nicht möglich"
+            alert.informativeText = "Setze den Cursor in ein bearbeitbares Feld und öffne die Schnellauswahl erneut."
+            alert.runModal()
         }
     }
 }

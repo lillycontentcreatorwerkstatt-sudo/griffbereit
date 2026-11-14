@@ -1,10 +1,57 @@
-# Griffbereit
+# Griffbereit · Zwischenablage für den Mac
 
-Eine deutschsprachige Menüleisten-App für den Mac. Kopiere einen Fund, suche ihn später über seinen Inhalt und lege ihn direkt im passenden Projektordner ab. Bei einem Screenshot landen das Bild und eine Markdown-Notiz mit dem lokal erkannten Text zusammen.
+Erst kopierst du einen Link, dann eine Adresse. In Mail brauchst du den Link wieder. Drücke **⇧⌘J**, tippe ein Wort und klicke auf den Treffer. Griffbereit setzt ihn dort ein, wo dein Cursor steht. Die deutschsprachige Menüleisten-App von Lilly sammelt auch Screenshots und verwandelt diktierte Ideen in durchsuchbare Notizen.
 
-## Starten
+**[Mac-App und Handbuch herunterladen (.zip)](https://github.com/lillycontentcreatorwerkstatt-sudo/griffbereit/releases/download/v0.4.3/Griffbereit-0.4.3-Testversion-Apple-Silicon.zip)** · [Handbuch als PDF](https://github.com/lillycontentcreatorwerkstatt-sudo/griffbereit/releases/download/v0.4.3/Griffbereit-0.4.3-Handbuch.pdf) · [Änderungen](CHANGELOG.md)
 
-Für macOS 14 oder neuer mit einem aktuellen Swift-SDK (Xcode oder Apple Command Line Tools). Zum Bauen mit KI-Unterstützung ist das macOS-26-SDK oder neuer erforderlich. Das Skript baut für den gerade verwendeten Mac.
+## Installieren und ausprobieren
+
+Die fertige ZIP braucht einen **Mac mit Apple-Chip (M1 oder neuer) und macOS 14 oder neuer**. Chip und Systemversion findest du im Apple-Menü unter **Über diesen Mac**.
+
+1. Entpacke die ZIP, öffne das Handbuch und ziehe **Griffbereit.app** nach **Programme**. Starte die App von dort. Bei einem Update beende vorher die laufende Version über ihr Zahnrad-Menü.
+2. Die Testversion ist lokal signiert und nicht von Apple notarisiert. Blockiert macOS den ersten Start wegen des unbestätigten Entwicklers und vertraust du dem Download, öffne nach dem Startversuch **Systemeinstellungen → Datenschutz & Sicherheit → Dennoch öffnen**. Bei einer Meldung über Schadsoftware oder eine beschädigte App brich den Start ab. [Apples Erklärung](https://support.apple.com/de-de/102445)
+3. Kopiere zwei kurze Texte nacheinander. Setze den Cursor in eine leere Notiz und drücke **⇧⌘J**. Klicke auf den *ersten* Text. Beim ersten Einfügen braucht Griffbereit die Freigabe unter **Datenschutz & Sicherheit → Bedienungshilfen**. Öffne die Auswahl danach erneut.
+4. Über das **Symbol mit den zwei Ablagen** in der Menüleiste erreichst du den Verlauf und die Einstellungen.
+
+## Was du ablegen kannst
+
+| Inhalt | So verwendest du ihn |
+| --- | --- |
+| Texte und Links | Kopiere wie gewohnt mit ⌘C. Während „Kopiertes sammeln“ aktiv ist, erscheinen neue Kopien im Verlauf. |
+| Screenshots und kopierte Bilder | In der Vorschau wählst du **Nur Text** für die lokale Texterkennung, **Bild behalten** für das PNG oder **Überspringen**. Das ursprüngliche Bildschirmfoto bleibt in seinem Ordner. |
+| Sprachnotizen | Drücke **⌃⌥M**, warte auf „Mikrofon an“, sprich und drücke das Kürzel erneut. Das deutsche Diktat läuft auf dem Gerät und braucht Mikrofon- und Spracherkennungszugriff. Ab macOS 26 kann Apple Intelligence den Text lokal überarbeiten, wenn das Modell für Deutsch verfügbar ist. Andernfalls speichert Griffbereit das Transkript. |
+| Finder-Dateien und Projekte | Kopierte Dateien erscheinen zunächst als Verweise. Über **Projekt wählen** bestimmst du das Ziel. **Im Projekt ablegen** kopiert Dateien oder exportiert Text als Markdown und Bilder als PNG. Eine fertige Sprachnotiz landet bei gewähltem Projekt zusätzlich dort. |
+
+## Tasten und Bedienung
+
+| Taste oder Aktion | Wirkung |
+| --- | --- |
+| ⇧⌘J (Umschalt + Befehl + J) | Schnellauswahl in der aktuellen App öffnen oder schließen |
+| Tippen, ↑ / ↓, dann ↩ | Verlauf durchsuchen und Treffer am Cursor einsetzen |
+| Klick auf einen Treffer | Auswahl schließen und den Eintrag direkt einsetzen |
+| Esc oder Klick außerhalb | Auswahl schließen |
+| ⌃⌥M (Control + Option + M) | Diktat starten oder beenden |
+| ⌘↩ im Hauptfenster | Ausgewählten Fund in den Projektordner exportieren |
+
+Beide globalen Kürzel kannst du im Zahnrad-Menü ändern.
+
+## Wenn etwas hakt
+
+- **Die Auswahl bleibt beim Klicken offen.** Ist Griffbereit in den Bedienungshilfen bereits eingeschaltet, kann der Eintrag zu einer älteren App-Kopie gehören. Wähle **App im Finder zeigen** in der Schnellauswahl. Entferne in den Bedienungshilfen den bisherigen Griffbereit-Eintrag mit **−**, füge genau die markierte App mit **+** hinzu und aktiviere sie. Starte Griffbereit neu und probiere den Klick in TextEdit.
+- **Eine Kopie oder ein Screenshot fehlt.** Prüfe **Kopiertes sammeln** und erlaube den Zugriff, falls macOS danach fragt. Für Bildschirmfotos überwacht Griffbereit den in macOS eingestellten Screenshot-Ordner. Hast du ihn geändert, pausiere das Sammeln kurz und aktiviere es wieder.
+- **Du möchtest den Verlauf löschen.** Öffne **Zwischenablage** im Hauptfenster. **Eintrag löschen** steht rechts in der Vorschau. **Verlauf leeren …** über der Liste entfernt nach Bestätigung alle Einträge des aktiven Verlaufs, auch bei gesetztem Suchfilter. Bereits exportierte Projektdateien bleiben erhalten.
+
+## Speicherung und Datenschutz
+
+Der Verlauf liegt lokal unter `~/Library/Application Support/Projektfach/funde.sqlite`. Darin sind auch die gespeicherten Bilder enthalten. Die Datenbank hat keine eigene Verschlüsselung. **Nur für diese Sitzung** verwendet einen getrennten Verlauf im Arbeitsspeicher. Beim Export entscheidest du über den Speicherort, auch über einen möglichen Cloud-Ordner.
+
+Griffbereit behält bis zu **150 Einträge** für **1, 7 oder 30 Tage**. Es überspringt Texte über 256 KiB, Bilder über 12 MiB und als vertraulich oder temporär markierte Kopien. Einige Passwort-Apps sind ausgeschlossen. Weitere kannst du per Bundle-ID ergänzen. Die Erkennung richtet sich nach der gerade aktiven App. Pausiere das Sammeln, wenn du sensible Inhalte kopierst.
+
+**Deinstallieren:** Beende Griffbereit über das Zahnrad und entferne die App aus „Programme“. Möchtest du auch den gespeicherten Verlauf entfernen, lösche nach dem Beenden den Ordner `~/Library/Application Support/Projektfach/`.
+
+## Selbst bauen und prüfen
+
+Du brauchst auf dem Mac die Apple Command Line Tools oder Xcode mit einem aktuellen Swift-Compiler. Für die KI-Funktion beim Eigenbau brauchst du das macOS-26-SDK oder neuer. Das Projekt verwendet Apple-Frameworks und das mit macOS gelieferte SQLite.
 
 ```sh
 git clone https://github.com/lillycontentcreatorwerkstatt-sudo/griffbereit.git
@@ -13,45 +60,16 @@ cd griffbereit
 open dist/Griffbereit.app
 ```
 
-Bei einem privaten Repository benötigt der verwendete GitHub-Account Zugriff. Die App lässt sich nach dem Bauen auch im Finder öffnen oder nach „Programme“ ziehen.
+`swift run FachChecks` prüft Speicherung, Aufbewahrung und Export. `./scripts/check-capture.sh` prüft die Schnellauswahl, Screenshots und Texterkennung in einer angemeldeten Mac-Sitzung. Der Test verwendet eine eigene Zwischenablage und temporäre Projektordner.
 
-## Eine Sprachnotiz ablegen
+| Pfad | Inhalt |
+| --- | --- |
+| [Sources/Griffbereit](Sources/Griffbereit) | Menüleiste, Fenster, Schnellauswahl, Tastenkürzel und Diktat |
+| [Sources/FachCore](Sources/FachCore) | Lokaler Verlauf und Projektexport |
+| [Tests](Tests) | Speicher- und Funktionstests |
+| [Resources/Info.plist](Resources/Info.plist) | App-Version und Beschreibungen der macOS-Freigaben |
+| [scripts](scripts) | App bauen und Erfassung prüfen |
 
-**⌃⌥M** startet das deutsche Diktat aus einer anderen App. Drücke das Kürzel erneut, um die Aufnahme zu beenden. Für denselben Ablauf gibt es die Tasten **Diktieren** und **Diktat beenden**. Beim ersten Mal fragt macOS nach Spracherkennung und Mikrofon.
+## Lizenz
 
-Griffbereit überarbeitet den erkannten Text mit Apple Intelligence auf dem Mac und speichert die Notiz im durchsuchbaren Verlauf. Ist ein Projektordner ausgewählt, wird die Fassung zusätzlich als Markdown-Datei dort abgelegt. Ohne verfügbares Modell oder bei einem Modellfehler bleibt das Transkript als Notiz erhalten. Die lokale KI benötigt macOS 26 oder neuer, einen dafür geeigneten Mac und aktiviertes Apple Intelligence. Beide globalen Tastenkürzel lassen sich in den Einstellungen ändern.
-
-## Screenshots und Kopiertes
-
-Während Griffbereit läuft, sammelt es neue kopierte Texte und Finder-Dateiverweise automatisch. **Kopiertes sammeln** pausiert oder aktiviert die Erfassung. Der bei macOS eingestellte Screenshot-Ordner wird beim Start und beim Fortsetzen geöffnet. Erlaube bei Bedarf den von macOS angefragten Ordnerzugriff. Griffbereit beobachtet neue Bildschirmfotos in diesem Ordner sowie Bilder in der Zwischenablage.
-
-Bei einem neuen Bild erscheint eine Vorschau. **Nur Text** übernimmt den erkannten Text in den Verlauf. **Bild behalten** speichert das Bild als PNG. **Überspringen** verwirft die Anfrage. Das von macOS angelegte Screenshot-Original bleibt in seinem Ordner. Bei einem Bild ohne lesbaren Text kannst du weiterhin das Bild wählen.
-
-Setze den Cursor in ein Textfeld und drücke **⇧⌘J**. Auf dem Bildschirm am Mauszeiger erscheint eine kompakte Schnellauswahl, der Hintergrund wird leicht abgedunkelt. Ein Klick auf einen Eintrag setzt ihn am Cursor ein. Du kannst auch suchen und mit Pfeiltasten und **↩** auswählen. **Esc**, ein Klick außerhalb oder das Kürzel schließen die Auswahl. Direktes Einfügen benötigt die macOS-Freigabe unter **Datenschutz & Sicherheit → Bedienungshilfen → Griffbereit**. Ohne Freigabe kopiert der Klick den Eintrag, den du mit **Esc** und **⌘V** einsetzt.
-
-Ein Klick auf das Griffbereit-Symbol in der Menüleiste öffnet das Hauptfenster. **⌘↩** exportiert den gewählten Eintrag in den Projektordner. Bei Finder-Dateien werden die Originale erst beim Export kopiert.
-
-## Einträge löschen
-
-Klicke auf das Griffbereit-Symbol in der Menüleiste und öffne die **Zwischenablage**. Wähle einen Eintrag aus und klicke in seiner Vorschau auf **Eintrag löschen**. Für den gesamten aktiven Verlauf klicke über der Liste auf **Verlauf leeren …** und bestätige mit **Verlauf löschen**. Die Suche schränkt die vollständige Löschung nicht ein. Bereits exportierte Dateien und der aktuelle Inhalt der macOS-Zwischenablage bleiben erhalten.
-
-## Verlauf und Privatsphäre
-
-Beim ersten Start dieser Version ist **Kopiertes sammeln** an. Die App merkt sich die gewählte Einstellung. Spracherkennung, Texterkennung und KI-Überarbeitung laufen lokal. Es wird keine Audiodatei gespeichert. Die lokale SQLite-Datenbank liegt unter `~/Library/Application Support/Projektfach/funde.sqlite`. Sie enthält auch Bilddaten und ist nicht separat verschlüsselt. Speicherorte für Projekte bestimmst du selbst, einschließlich möglicher Cloud-Ordner.
-
-- **Aufbewahrung** umfasst bis zu 150 Einträge und wahlweise 1, 7 oder 30 Tage. Die Bereinigung läuft beim Öffnen und während der Nutzung des jeweiligen Verlaufs.
-- **Nur für diese Sitzung** führt einen getrennten Verlauf im Arbeitsspeicher. Beim Beenden oder Verlassen dieses Modus verfallen die Sitzungseinträge. Vorhandene lokale Einträge bleiben im lokalen Verlauf.
-- **Ausgeschlossene Apps** lassen sich per Bundle-ID ergänzen. Die Erkennung richtet sich nach der im Erfassungsmoment aktiven App. Als vertraulich oder temporär markierte Zwischenablagen werden übersprungen. Unmarkierte Geheimnisse aus anderen Apps können im Verlauf landen.
-- **Bilderkennung** nutzt Apple Vision auf dem Gerät. Für einen erfassten Fund gelten 256 KiB bei Text und 12 MiB bei Bilddaten. Beim Export bleibt der ursprüngliche Text unverändert.
-
-Das globale Tastenkürzel lässt sich im Zahnrad-Menü neu aufnehmen. Die Vorschau folgt der hellen oder dunklen Systemdarstellung.
-
-## Entwicklung
-
-```sh
-swift run FachChecks
-./scripts/check-capture.sh
-./scripts/build-app.sh
-```
-
-Der App-Code liegt unter `Sources/Griffbereit`, der SQLite-Speicher und der Projektexport unter `Sources/FachCore`. Die automatisierten Tests verwenden Wegwerfordner und Arbeitsspeicher. Das Buildskript signiert lokal ad hoc. Eine eigene Signatur kann über `CODE_SIGN_IDENTITY` gesetzt werden.
+Griffbereit steht unter der [MIT-Lizenz](LICENSE). Du darfst den Code verwenden, verändern und weitergeben, auch kommerziell. Bei Kopien und wesentlichen Teilen müssen Copyright- und Lizenzhinweis erhalten bleiben.

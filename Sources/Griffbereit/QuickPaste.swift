@@ -90,14 +90,7 @@ private struct PasteList: View {
 
     private func paste(_ record: Record) {
         do {
-            try desk.copyToPasteboard(record)
-            guard !target.isTerminated else { notice = "Kopiert. Die Ziel-App wurde beendet."; return }
-            guard AXIsProcessTrusted() else {
-                notice = "Kopiert. Für diesen Eintrag: Esc drücken und mit ⌘V einsetzen."
-                return
-            }
-            close()
-            desk.pasteInto(target)
+            try desk.insert(record, into: target, dismiss: close)
         } catch { notice = error.localizedDescription }
     }
 
@@ -145,12 +138,18 @@ private struct PasteList: View {
                 Divider()
                 Text(notice).font(.callout).padding(10)
             }
-            if !AXIsProcessTrusted() {
-                Button("Bedienungshilfen für direktes Einfügen öffnen …") {
+            if !Desk.canPaste {
+                HStack {
+                Button("Direktes Einfügen einmalig erlauben …") {
                     close()
-                    if let url = URL(string: "x-apple.systempreferences:com.apple.preference.security?Privacy_Accessibility") {
-                        NSWorkspace.shared.open(url)
-                    }
+                    let options = [kAXTrustedCheckOptionPrompt.takeUnretainedValue() as String: true] as CFDictionary
+                    _ = AXIsProcessTrustedWithOptions(options)
+                    Desk.openPasteSettings()
+                }
+                Button("App im Finder zeigen") {
+                    close()
+                    NSWorkspace.shared.activateFileViewerSelecting([Bundle.main.bundleURL])
+                }
                 }.buttonStyle(.link).padding(10)
             }
         }.background(.regularMaterial, in: RoundedRectangle(cornerRadius: 12))
